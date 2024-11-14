@@ -3,16 +3,22 @@
 // - Byte buffer
 module Minilib.Encoding.Binary;
 
-
+// A union type of byte order (endianness).
+// For example, `0x12345678_U32` is encoded as `[0x78_U8, 0x56_U8, 0x34_U8, 0x12_U8]` in little endian,
+// `[0x12_U8, 0x34_U8, 0x56_U8, 0x78_U8]` in big endian.
 type ByteOrder = unbox union {
     little_endian: (),
     big_endian: ()
 };
 
+// A type of byte buffer that supports encoding values to/decoding values from memory.
 type ByteBuffer = unbox struct {
-    array: Array U8,            // internal byte array
-    byte_order: ByteOrder,      // byte order
-    position: I64               // read/write position
+    // internal byte array
+    array: Array U8,            
+    // byte order
+    byte_order: ByteOrder,      
+    // read/write position
+    position: I64               
 };
 
 namespace ByteBuffer {
@@ -81,7 +87,7 @@ namespace ByteBuffer {
     get_bytes: ByteBuffer -> Array U8;
     get_bytes = @array;
 
-    // Gets U8 from the byte buffer at position `i`.
+    // Decodes U8 from the byte buffer at position `i`.
     get_u8: I64 -> ByteBuffer -> U8;
     get_u8 = |i, buf| (
         if buf.@byte_order.is_little_endian { 
@@ -91,7 +97,7 @@ namespace ByteBuffer {
         }
     );
 
-    // Gets U16 from the byte buffer at position `i`.
+    // Decodes U16 from the byte buffer at position `i`.
     get_u16: I64 -> ByteBuffer -> U16;
     get_u16 = |i, buf| (
         if buf.@byte_order.is_little_endian { 
@@ -101,7 +107,7 @@ namespace ByteBuffer {
         }
     );
 
-    // Gets U32 from the byte buffer at position `i`.
+    // Decodes U32 from the byte buffer at position `i`.
     get_u32: I64 -> ByteBuffer -> U32;
     get_u32 = |i, buf| (
         if buf.@byte_order.is_little_endian { 
@@ -111,7 +117,7 @@ namespace ByteBuffer {
         }
     );
 
-    // Gets U64 from the byte buffer at position `i`.
+    // Decodes U64 from the byte buffer at position `i`.
     get_u64: I64 -> ByteBuffer -> U64;
     get_u64 = |i, buf| (
         if buf.@byte_order.is_little_endian { 
@@ -121,7 +127,7 @@ namespace ByteBuffer {
         }
     );
 
-    // Reads a value from the byte buffer.
+    // (Internal function for `Unmarshal::unmarshal`)
     _unmarshal: (I64 -> ByteBuffer -> a) -> I64 -> ByteBuffer -> Result ErrMsg (a, ByteBuffer);
     _unmarshal = |get_val, size, buf| (
         let pos = buf.get_position;
@@ -131,7 +137,7 @@ namespace ByteBuffer {
         pure $ (val, buf)
     );
 
-    // Sets U8 into the byte buffer at position `i`.
+    // Encodes U8 into the byte buffer at position `i`.
     set_u8: I64 -> U8 -> ByteBuffer -> ByteBuffer;
     set_u8 = |i, val, buf| (
         if buf.@byte_order.is_little_endian { 
@@ -141,7 +147,7 @@ namespace ByteBuffer {
         }
     );
 
-    // Sets U16 into the byte buffer at position `i`.
+    // Encodes U16 into the byte buffer at position `i`.
     set_u16: I64 -> U16 -> ByteBuffer -> ByteBuffer;
     set_u16 = |i, val, buf| (
         if buf.@byte_order.is_little_endian { 
@@ -151,7 +157,7 @@ namespace ByteBuffer {
         }
     );
     
-    // Sets U32 into the byte buffer at position `i`.
+    // Encodes U32 into the byte buffer at position `i`.
     set_u32: I64 -> U32 -> ByteBuffer -> ByteBuffer;
     set_u32 = |i, val, buf| (
         if buf.@byte_order.is_little_endian { 
@@ -161,7 +167,7 @@ namespace ByteBuffer {
         }
     );
 
-    // Sets U64 into the byte buffer at position `i`.
+    // Encodes U64 into the byte buffer at position `i`.
     set_u64: I64 -> U64 -> ByteBuffer -> ByteBuffer;
     set_u64 = |i, val, buf| (
         if buf.@byte_order.is_little_endian { 
@@ -171,7 +177,7 @@ namespace ByteBuffer {
         }
     );
 
-    // Writes a value to the byte buffer.
+    // (Internal function for `Marshal::marshal`)
     _marshal: (I64 -> a -> ByteBuffer -> ByteBuffer) -> I64 -> a -> ByteBuffer -> ByteBuffer;
     _marshal = |set_val, size, val, buf| (
         let pos = buf.get_position;
@@ -215,7 +221,10 @@ namespace ByteBuffer {
     );
 }
 
+// Trait for a type that supports marshalling (encoding) a value to a byte buffer.
+// For details, see https://en.wikipedia.org/wiki/Marshalling_(computer_science).
 trait a: Marshal {
+    // Encodes a value to the byte buffer.
     marshal: a -> ByteBuffer -> ByteBuffer;
 }
 
@@ -235,7 +244,10 @@ impl U64: Marshal {
     marshal = |val, buf| buf._marshal(set_u64, 8, val);
 }
 
+// Trait for a type that supports unmarshalling (decoding) a value from a byte buffer.
+// For details, see https://en.wikipedia.org/wiki/Marshalling_(computer_science).
 trait a: Unmarshal {
+    // Decodes a value from the byte buffer.
     unmarshal: ByteBuffer -> Result ErrMsg (a, ByteBuffer);
 }
 

@@ -10,6 +10,8 @@ Binary utility, such as:
 
 ### `type ByteBuffer = unbox struct { ...fields... }`
 
+A type of byte buffer that supports encoding values to/decoding values from memory.
+
 #### field `array : Std::Array Std::U8`
 
 #### field `byte_order : Minilib.Encoding.Binary::ByteOrder`
@@ -17,6 +19,10 @@ Binary utility, such as:
 #### field `position : Std::I64`
 
 ### `type ByteOrder = unbox union { ...variants... }`
+
+A union type of byte order (endianness).
+For example, `0x12345678_U32` is encoded as `[0x78_U8, 0x56_U8, 0x34_U8, 0x12_U8]` in little endian,
+`[0x12_U8, 0x34_U8, 0x56_U8, 0x78_U8]` in big endian.
 
 #### variant `little_endian : ()`
 
@@ -28,11 +34,21 @@ Binary utility, such as:
 
 ### `trait a : Marshal`
 
+Trait for a type that supports marshalling (encoding) a value to a byte buffer.
+For details, see https://en.wikipedia.org/wiki/Marshalling_(computer_science).
+
 #### method `marshal : a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
+
+Encodes a value to the byte buffer.
 
 ### `trait a : Unmarshal`
 
+Trait for a type that supports unmarshalling (decoding) a value from a byte buffer.
+For details, see https://en.wikipedia.org/wiki/Marshalling_(computer_science).
+
 #### method `unmarshal : Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::String (a, Minilib.Encoding.Binary::ByteBuffer)`
+
+Decodes a value from the byte buffer.
 
 # Trait implementations
 
@@ -136,11 +152,11 @@ Retrieves the field `position` from a value of `ByteBuffer`.
 
 ### `_marshal : (Std::I64 -> a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer) -> Std::I64 -> a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
-Writes a value to the byte buffer.
+(Internal function for `Marshal::marshal`)
 
 ### `_unmarshal : (Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> a) -> Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::String (a, Minilib.Encoding.Binary::ByteBuffer)`
 
-Reads a value from the byte buffer.
+(Internal function for `Unmarshal::unmarshal`)
 
 ### `act_array : [f : Std::Functor] (Std::Array Std::U8 -> f (Std::Array Std::U8)) -> Minilib.Encoding.Binary::ByteBuffer -> f Minilib.Encoding.Binary::ByteBuffer`
 
@@ -191,19 +207,19 @@ Gets the size of internal byte array.
 
 ### `get_u16 : Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::U16`
 
-Gets U16 from the byte buffer at position `i`.
+Decodes U16 from the byte buffer at position `i`.
 
 ### `get_u32 : Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::U32`
 
-Gets U32 from the byte buffer at position `i`.
+Decodes U32 from the byte buffer at position `i`.
 
 ### `get_u64 : Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::U64`
 
-Gets U64 from the byte buffer at position `i`.
+Decodes U64 from the byte buffer at position `i`.
 
 ### `get_u8 : Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::U8`
 
-Gets U8 from the byte buffer at position `i`.
+Decodes U8 from the byte buffer at position `i`.
 
 ### `make : Std::Array Std::U8 -> Minilib.Encoding.Binary::ByteOrder -> Minilib.Encoding.Binary::ByteBuffer`
 
@@ -237,19 +253,19 @@ Updates a value of `ByteBuffer` by setting field `position` to a specified one.
 
 ### `set_u16 : Std::I64 -> Std::U16 -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
-Sets U16 into the byte buffer at position `i`.
+Encodes U16 into the byte buffer at position `i`.
 
 ### `set_u32 : Std::I64 -> Std::U32 -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
-Sets U32 into the byte buffer at position `i`.
+Encodes U32 into the byte buffer at position `i`.
 
 ### `set_u64 : Std::I64 -> Std::U64 -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
-Sets U64 into the byte buffer at position `i`.
+Encodes U64 into the byte buffer at position `i`.
 
 ### `set_u8 : Std::I64 -> Std::U8 -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
-Sets U8 into the byte buffer at position `i`.
+Encodes U8 into the byte buffer at position `i`.
 
 ### `to_u32_array : Minilib.Encoding.Binary::ByteBuffer -> Std::Array Std::U32`
 
@@ -295,6 +311,10 @@ Updates a value of union `ByteOrder` by applying a function if it is the variant
 
 ### `marshal : [a : Minilib.Encoding.Binary::Marshal] a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
+Encodes a value to the byte buffer.
+
 ## `namespace Minilib.Encoding.Binary::Unmarshal`
 
 ### `unmarshal : [a : Minilib.Encoding.Binary::Unmarshal] Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::String (a, Minilib.Encoding.Binary::ByteBuffer)`
+
+Decodes a value from the byte buffer.
