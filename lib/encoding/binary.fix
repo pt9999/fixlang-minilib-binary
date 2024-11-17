@@ -53,9 +53,9 @@ namespace ByteBuffer {
     );
 
     // Calls a function with a pointer to the memory region where elements are stored.
-    borrow_ptr : (Ptr -> b) -> ByteBuffer -> b;
-    borrow_ptr = |f, buf| (
-        buf.@array.borrow_ptr(f)
+    borrow_boxed : (Ptr -> b) -> ByteBuffer -> b;
+    borrow_boxed = |f, buf| (
+        buf.@array.borrow_boxed(f)
     );
 
     // Gets the read/write position.
