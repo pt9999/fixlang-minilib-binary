@@ -170,10 +170,6 @@ Updates a value of `ByteBuffer` by applying a functorial action to field `byte_o
 
 Updates a value of `ByteBuffer` by applying a functorial action to field `position`.
 
-### `borrow_ptr : (Std::Ptr -> b) -> Minilib.Encoding.Binary::ByteBuffer -> b`
-
-Calls a function with a pointer to the memory region where elements are stored.
-
 ### `empty : Std::I64 -> Minilib.Encoding.Binary::ByteOrder -> Minilib.Encoding.Binary::ByteBuffer`
 
 `ByteBuffer::empty(capacity, byte_order)` creates new byte buffer such that:
