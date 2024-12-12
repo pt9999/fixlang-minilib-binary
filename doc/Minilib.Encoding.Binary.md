@@ -138,18 +138,6 @@ Encodes U8 into `array` at position `i` with little endian.
 
 ## `namespace Minilib.Encoding.Binary::ByteBuffer`
 
-### `@array : Minilib.Encoding.Binary::ByteBuffer -> Std::Array Std::U8`
-
-Retrieves the field `array` from a value of `ByteBuffer`.
-
-### `@byte_order : Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteOrder`
-
-Retrieves the field `byte_order` from a value of `ByteBuffer`.
-
-### `@position : Minilib.Encoding.Binary::ByteBuffer -> Std::I64`
-
-Retrieves the field `position` from a value of `ByteBuffer`.
-
 ### `_marshal : (Std::I64 -> a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer) -> Std::I64 -> a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
 (Internal function for `Marshal::marshal`)
@@ -157,18 +145,6 @@ Retrieves the field `position` from a value of `ByteBuffer`.
 ### `_unmarshal : (Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> a) -> Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::String (a, Minilib.Encoding.Binary::ByteBuffer)`
 
 (Internal function for `Unmarshal::unmarshal`)
-
-### `act_array : [f : Std::Functor] (Std::Array Std::U8 -> f (Std::Array Std::U8)) -> Minilib.Encoding.Binary::ByteBuffer -> f Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by applying a functorial action to field `array`.
-
-### `act_byte_order : [f : Std::Functor] (Minilib.Encoding.Binary::ByteOrder -> f Minilib.Encoding.Binary::ByteOrder) -> Minilib.Encoding.Binary::ByteBuffer -> f Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by applying a functorial action to field `byte_order`.
-
-### `act_position : [f : Std::Functor] (Std::I64 -> f Std::I64) -> Minilib.Encoding.Binary::ByteBuffer -> f Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by applying a functorial action to field `position`.
 
 ### `empty : Std::I64 -> Minilib.Encoding.Binary::ByteOrder -> Minilib.Encoding.Binary::ByteBuffer`
 
@@ -223,30 +199,6 @@ Decodes U8 from the byte buffer at position `i`.
 - The internal byte array is `array`
 - The byte order is `byte_order`
 
-### `mod_array : (Std::Array Std::U8 -> Std::Array Std::U8) -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by applying a function to field `array`.
-
-### `mod_byte_order : (Minilib.Encoding.Binary::ByteOrder -> Minilib.Encoding.Binary::ByteOrder) -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by applying a function to field `byte_order`.
-
-### `mod_position : (Std::I64 -> Std::I64) -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by applying a function to field `position`.
-
-### `set_array : Std::Array Std::U8 -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by setting field `array` to a specified one.
-
-### `set_byte_order : Minilib.Encoding.Binary::ByteOrder -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by setting field `byte_order` to a specified one.
-
-### `set_position : Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
-
-Updates a value of `ByteBuffer` by setting field `position` to a specified one.
-
 ### `set_u16 : Std::I64 -> Std::U16 -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
 Encodes U16 into the byte buffer at position `i`.
@@ -266,42 +218,6 @@ Encodes U8 into the byte buffer at position `i`.
 ### `to_u32_array : Minilib.Encoding.Binary::ByteBuffer -> Std::Array Std::U32`
 
 ### `to_u8_array : Minilib.Encoding.Binary::ByteBuffer -> Std::Array Std::U8`
-
-## `namespace Minilib.Encoding.Binary::ByteOrder`
-
-### `as_big_endian : Minilib.Encoding.Binary::ByteOrder -> ()`
-
-Unwraps a union value of `ByteOrder` as the variant `big_endian`.
-If the value is not the variant `big_endian`, this function aborts the program.
-
-### `as_little_endian : Minilib.Encoding.Binary::ByteOrder -> ()`
-
-Unwraps a union value of `ByteOrder` as the variant `little_endian`.
-If the value is not the variant `little_endian`, this function aborts the program.
-
-### `big_endian : () -> Minilib.Encoding.Binary::ByteOrder`
-
-Constructs a value of union `ByteOrder` taking the variant `big_endian`.
-
-### `is_big_endian : Minilib.Encoding.Binary::ByteOrder -> Std::Bool`
-
-Checks if a union value of `ByteOrder` is the variant `big_endian`.
-
-### `is_little_endian : Minilib.Encoding.Binary::ByteOrder -> Std::Bool`
-
-Checks if a union value of `ByteOrder` is the variant `little_endian`.
-
-### `little_endian : () -> Minilib.Encoding.Binary::ByteOrder`
-
-Constructs a value of union `ByteOrder` taking the variant `little_endian`.
-
-### `mod_big_endian : (() -> ()) -> Minilib.Encoding.Binary::ByteOrder -> Minilib.Encoding.Binary::ByteOrder`
-
-Updates a value of union `ByteOrder` by applying a function if it is the variant `big_endian`, or doing nothing otherwise.
-
-### `mod_little_endian : (() -> ()) -> Minilib.Encoding.Binary::ByteOrder -> Minilib.Encoding.Binary::ByteOrder`
-
-Updates a value of union `ByteOrder` by applying a function if it is the variant `little_endian`, or doing nothing otherwise.
 
 ## `namespace Minilib.Encoding.Binary::Marshal`
 
