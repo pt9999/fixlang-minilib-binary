@@ -17,7 +17,7 @@ decode_hex_char = |c| (
     if '0' <= c && c <= '9' { ok $ c - '0' };
     if 'A' <= c && c <= 'F' { ok $ c - 'A' + 10_U8 };
     if 'a' <= c && c <= 'f' { ok $ c - 'a' + 10_U8 };
-    err $ "Not a hexadecimal character: '" + byte_to_string(c) + "'"
+    err $ "Not a hexadecimal character: '" + String::from_U8(c) + "'"
 );
 
 
