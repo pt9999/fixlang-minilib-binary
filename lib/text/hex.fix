@@ -49,7 +49,7 @@ _array_from_string_hex = |n, input| (
     loop_m(
         (Array::empty(count), 0), |(array, i)|
         if i >= count { break_m $ array };
-        let hex_str = input.substring(i * n, (i + 1) * n);
+        let hex_str = input.get_sub(i * n, (i + 1) * n);
         let value = *hex_str.from_string_hex;
         let array = array.push_back(value);
         continue_m $ (array, i + 1)
