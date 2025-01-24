@@ -69,13 +69,13 @@ For example, `0x03_U8.to_hex_string == "03"`.
 
 ## `namespace Minilib.Text.Hex`
 
-### `_array_from_string_hex : [a : Minilib.Text.Hex::FromStringHex] Std::I64 -> Std::String -> Std::Result Std::String (Std::Array a)`
+### `_array_from_string_hex : [a : Minilib.Text.Hex::FromStringHex] Std::I64 -> Std::String -> Std::Result Std::ErrMsg (Std::Array a)`
 
 `input._array_from_string_hex(n)` splits the input string
 to `n` characters each, then converts each component to numbers.
 Whitespaces are ignored.
 
-### `_from_string_hex : Std::I64 -> Std::String -> Std::Result Std::String Std::U64`
+### `_from_string_hex : Std::I64 -> Std::String -> Std::Result Std::ErrMsg Std::U64`
 
 `input._from_string_hex(n)` converts a hex string of `1..n` characters
 to a 64bit number.
@@ -85,7 +85,7 @@ to a 64bit number.
 `input._to_string_hex(n)` converts least significant `4 * n` bits of `input`
 to a hex string of `n` characters.
 
-### `decode_hex_char : Std::U8 -> Std::Result Std::String Std::U8`
+### `decode_hex_char : Std::U8 -> Std::Result Std::ErrMsg Std::U8`
 
 Converts a hex character ('0'..'9', 'A'..'F' or 'a'..'f') to a 4bit number (0..15).
 
@@ -95,7 +95,7 @@ Converts a 4bit number (0..15) to a hex character ('0'..'9', 'a'..'f').
 
 ## `namespace Minilib.Text.Hex::FromStringHex`
 
-### `from_string_hex : [a : Minilib.Text.Hex::FromStringHex] Std::String -> Std::Result Std::String a`
+### `from_string_hex : [a : Minilib.Text.Hex::FromStringHex] Std::String -> Std::Result Std::ErrMsg a`
 
 ## `namespace Minilib.Text.Hex::ToStringHex`
 

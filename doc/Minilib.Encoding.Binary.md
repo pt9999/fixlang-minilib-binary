@@ -142,7 +142,7 @@ Encodes U8 into `array` at position `i` with little endian.
 
 (Internal function for `Marshal::marshal`)
 
-### `_unmarshal : (Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> a) -> Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::String (a, Minilib.Encoding.Binary::ByteBuffer)`
+### `_unmarshal : (Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> a) -> Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::ErrMsg (a, Minilib.Encoding.Binary::ByteBuffer)`
 
 (Internal function for `Unmarshal::unmarshal`)
 
@@ -227,6 +227,6 @@ Encodes a value to the byte buffer.
 
 ## `namespace Minilib.Encoding.Binary::Unmarshal`
 
-### `unmarshal : [a : Minilib.Encoding.Binary::Unmarshal] Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::String (a, Minilib.Encoding.Binary::ByteBuffer)`
+### `unmarshal : [a : Minilib.Encoding.Binary::Unmarshal] Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::ErrMsg (a, Minilib.Encoding.Binary::ByteBuffer)`
 
 Decodes a value from the byte buffer.
