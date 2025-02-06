@@ -89,7 +89,7 @@ _b64_to_u8_table = (
 _u8_to_b64_table: Array U8;
 _u8_to_b64_table = (
     Iterator::range(0, 64).fold(
-        Array::fill(256, 0xFF_U8), |arr, b64|
+        Array::fill(256, 0xFF_U8), |b64, arr|
         let u8 = _b64_to_u8_table.@(b64);
         arr.set(u8.to_I64, b64.to_U8)
     )

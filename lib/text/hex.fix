@@ -33,7 +33,7 @@ _from_string_hex = |n, input| (
     };
     let input = input.get_bytes.pop_back;
     input.to_iter.fold_m(
-        0_U64, |output, c|
+        0_U64, |c, output|
         let c = *decode_hex_char(c);
         pure $ output.shift_left(4_U64).bit_or(c.to_U64)
     )
