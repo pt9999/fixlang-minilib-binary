@@ -8,7 +8,7 @@ base64_encode: Array U8 -> String;
 base64_encode = |src| (
     let src_size = src.get_size;
     let dest_size = (src_size + 2) / 3 * 4;
-    let dest = Array::fill(dest_size, 0_U8);
+    let dest = Array::fill(dest_size + 1, 0_U8); // +1 for null terminator
     let dest = loop(
         (dest, 0, 0), |(dest, src_idx, dest_idx)|
         if src_idx >= src_size {
@@ -20,17 +20,17 @@ base64_encode = |src| (
         let b0 = src.@(src_idx);
         let b1 = if has_b1 { src.@(src_idx + 1) } else { 0_U8 };
         let b2 = if has_b2 { src.@(src_idx + 2) } else { 0_U8 };
-        let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8));
-        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).bit_and(63_U8));
-        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_or(b2.shift_right(6_U8)).bit_and(63_U8));
-        let u3 = _b64_to_u8_table.@(b2.bit_and(63_U8));
+        let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).to_I64);
+        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).bit_and(63_U8).to_I64);
+        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_or(b2.shift_right(6_U8)).bit_and(63_U8).to_I64);
+        let u3 = _b64_to_u8_table.@(b2.bit_and(63_U8).to_I64);
         let dest = dest.set(dest_idx, u0)
                         .set(dest_idx + 1, u1)
                         .set(dest_idx + 2, if has_b1 { u2 } else { '=' })
                         .set(dest_idx + 3, if has_b2 { u3 } else { '=' });
         continue $ (dest, src_idx + 3, dest_idx + 4)
     );
-    dest
+    dest._unsafe_from_c_str
 );
 
 // Decodes a string which contains BASE64 characters to a byte array.
@@ -89,7 +89,7 @@ _b64_to_u8_table = (
 _u8_to_b64_table: Array U8;
 _u8_to_b64_table = (
     Iterator::range(0, 64).fold(
-        Array::fill(256, 0xFF_U8), |arr, b64|
+        Array::fill(256, 0xFF_U8), |b64, arr|
         let u8 = _b64_to_u8_table.@(b64);
         arr.set(u8.to_I64, b64.to_U8)
     )
