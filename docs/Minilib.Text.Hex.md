@@ -1,34 +1,12 @@
 # Minilib.Text.Hex
 
-Defined in minilib-binary@0.5.1
+Defined in minilib-binary@0.5.2
 
 Hexadecimal string conversion
 
 ## Values
 
 ### namespace Minilib.Text.Hex
-
-#### _array_from_string_hex
-
-Type: `[a : Minilib.Text.Hex::FromStringHex] Std::I64 -> Std::String -> Std::Result Std::ErrMsg (Std::Array a)`
-
-`input._array_from_string_hex(n)` splits the input string
-to `n` characters each, then converts each component to numbers.
-Whitespaces are ignored.
-
-#### _from_string_hex
-
-Type: `Std::I64 -> Std::String -> Std::Result Std::ErrMsg Std::U64`
-
-`input._from_string_hex(n)` converts a hex string of `1..n` characters
-to a 64bit number.
-
-#### _to_string_hex
-
-Type: `Std::I64 -> Std::U64 -> Std::String`
-
-`input._to_string_hex(n)` converts least significant `4 * n` bits of `input`
-to a hex string of `n` characters.
 
 #### decode_hex_char
 

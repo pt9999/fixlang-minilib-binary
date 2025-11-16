@@ -1,6 +1,6 @@
 # Minilib.Encoding.Binary
 
-Defined in minilib-binary@0.5.1
+Defined in minilib-binary@0.5.2
 
 Binary utility, such as:
 - Byte order
@@ -107,18 +107,6 @@ Type: `Std::I64 -> Std::U8 -> Std::Array Std::U8 -> Std::Array Std::U8`
 Encodes U8 into `array` at position `i` with little endian.
 
 ### namespace Minilib.Encoding.Binary::ByteBuffer
-
-#### _marshal
-
-Type: `(Std::I64 -> a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer) -> Std::I64 -> a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
-
-(Internal function for `Marshal::marshal`)
-
-#### _unmarshal
-
-Type: `(Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> a) -> Std::I64 -> Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::ErrMsg (a, Minilib.Encoding.Binary::ByteBuffer)`
-
-(Internal function for `Unmarshal::unmarshal`)
 
 #### empty
 

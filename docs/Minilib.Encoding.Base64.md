@@ -1,30 +1,12 @@
 # Minilib.Encoding.Base64
 
-Defined in minilib-binary@0.5.1
+Defined in minilib-binary@0.5.2
 
 BASE64 encoding and decoding
 
 ## Values
 
 ### namespace Minilib.Encoding.Base64
-
-#### _b64_to_u8_table
-
-Type: `Std::Array Std::U8`
-
-[0..63] -> [0..255]
-
-#### _filter_array
-
-Type: `(a -> Std::Bool) -> Std::Array a -> Std::Array a`
-
-Same as `to_iter >> filter(f) >> to_array`, but faster.
-
-#### _u8_to_b64_table
-
-Type: `Std::Array Std::U8`
-
-[0..255] -> [0..63], or 0xFF if not a BASE64 char
 
 #### base64_decode
 
