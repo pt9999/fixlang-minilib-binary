@@ -10,15 +10,15 @@ test_byte_buffer_get = (
     make_test("test_byte_buffer_get") $ |_|
     let array = Array::from_map(256, |i| i.to_U8);
     let buf = ByteBuffer::make(array, ByteOrder::little_endian());
-    let _ = *assert_equal("le get_u8", 0x41_U8, buf.get_u8(0x41));
-    let _ = *assert_equal("le get_u16", 0x4241_U16, buf.get_u16(0x41));
-    let _ = *assert_equal("le get_u32", 0x44434241_U32, buf.get_u32(0x41));
-    let _ = *assert_equal("le get_u64", 0x4847464544434241_U64, buf.get_u64(0x41));
+    assert_equal("le get_u8", 0x41_U8, buf.get_u8(0x41));;
+    assert_equal("le get_u16", 0x4241_U16, buf.get_u16(0x41));;
+    assert_equal("le get_u32", 0x44434241_U32, buf.get_u32(0x41));;
+    assert_equal("le get_u64", 0x4847464544434241_U64, buf.get_u64(0x41));;
     let buf = ByteBuffer::make(array, ByteOrder::big_endian());
-    let _ = *assert_equal("be get_u8", 0x41_U8, buf.get_u8(0x41));
-    let _ = *assert_equal("be get_u16", 0x4142_U16, buf.get_u16(0x41));
-    let _ = *assert_equal("be get_u32", 0x41424344_U32, buf.get_u32(0x41));
-    let _ = *assert_equal("be get_u64", 0x4142434445464748_U64, buf.get_u64(0x41));
+    assert_equal("be get_u8", 0x41_U8, buf.get_u8(0x41));;
+    assert_equal("be get_u16", 0x4142_U16, buf.get_u16(0x41));;
+    assert_equal("be get_u32", 0x41424344_U32, buf.get_u32(0x41));;
+    assert_equal("be get_u64", 0x4142434445464748_U64, buf.get_u64(0x41));;
     pure()
 );
 
@@ -26,23 +26,23 @@ test_byte_buffer_set: TestCase;
 test_byte_buffer_set = (
     make_test("test_byte_buffer_set") $ |_|
     let buf = ByteBuffer::fill(8, 0_U8, ByteOrder::little_endian());
-    let _ = *assert_equal("le set_u8",  [0x41_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
-                                        buf.set_u8(0, 0x41_U8).get_bytes);
-    let _ = *assert_equal("le set_u16", [0x42_U8, 0x41_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
-                                        buf.set_u16(0, 0x4142_U16).get_bytes);
-    let _ = *assert_equal("le set_u32", [0x44_U8, 0x43_U8, 0x42_U8, 0x41_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
-                                        buf.set_u32(0, 0x41424344_U32).get_bytes);
-    let _ = *assert_equal("le set_u64", [0x48_U8, 0x47_U8, 0x46_U8, 0x45_U8, 0x44_U8, 0x43_U8, 0x42_U8, 0x41_U8],
-                                        buf.set_u64(0, 0x4142434445464748_U64).get_bytes);
+    assert_equal("le set_u8",  [0x41_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
+                                        buf.set_u8(0, 0x41_U8).get_bytes);;
+    assert_equal("le set_u16", [0x42_U8, 0x41_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
+                                        buf.set_u16(0, 0x4142_U16).get_bytes);;
+    assert_equal("le set_u32", [0x44_U8, 0x43_U8, 0x42_U8, 0x41_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
+                                        buf.set_u32(0, 0x41424344_U32).get_bytes);;
+    assert_equal("le set_u64", [0x48_U8, 0x47_U8, 0x46_U8, 0x45_U8, 0x44_U8, 0x43_U8, 0x42_U8, 0x41_U8],
+                                        buf.set_u64(0, 0x4142434445464748_U64).get_bytes);;
     let buf = ByteBuffer::fill(8, 0_U8, ByteOrder::big_endian());
-    let _ = *assert_equal("be set_u8",  [0x41_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
-                                        buf.set_u8(0, 0x41_U8).get_bytes);
-    let _ = *assert_equal("be set_u16", [0x41_U8, 0x42_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
-                                        buf.set_u16(0, 0x4142_U16).get_bytes);
-    let _ = *assert_equal("be set_u32", [0x41_U8, 0x42_U8, 0x43_U8, 0x44_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
-                                        buf.set_u32(0, 0x41424344_U32).get_bytes);
-    let _ = *assert_equal("be set_u64", [0x41_U8, 0x42_U8, 0x43_U8, 0x44_U8, 0x45_U8, 0x46_U8, 0x47_U8, 0x48_U8],
-                                        buf.set_u64(0, 0x4142434445464748_U64).get_bytes);
+    assert_equal("be set_u8",  [0x41_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
+                                        buf.set_u8(0, 0x41_U8).get_bytes);;
+    assert_equal("be set_u16", [0x41_U8, 0x42_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
+                                        buf.set_u16(0, 0x4142_U16).get_bytes);;
+    assert_equal("be set_u32", [0x41_U8, 0x42_U8, 0x43_U8, 0x44_U8, 0x00_U8, 0x00_U8, 0x00_U8, 0x00_U8],
+                                        buf.set_u32(0, 0x41424344_U32).get_bytes);;
+    assert_equal("be set_u64", [0x41_U8, 0x42_U8, 0x43_U8, 0x44_U8, 0x45_U8, 0x46_U8, 0x47_U8, 0x48_U8],
+                                        buf.set_u64(0, 0x4142434445464748_U64).get_bytes);;
     pure()
 );
 
@@ -54,10 +54,10 @@ test_marshal = (
     let buf = buf.marshal(0x0203_U16);
     let buf = buf.marshal(0x04050607_U32);
     let buf = buf.marshal(0x08090a0b0c0d0e0f_U64);
-    let _ = *assert_equal("size", 15, buf.get_size);
-    let _ = *assert_equal("position", 15, buf.get_position);
-    let _ = *assert_equal("array", [0x01_U8, 0x02_U8, 0x03_U8, 0x04_U8, 0x05_U8, 0x06_U8, 0x07_U8, 0x08_U8,
-                        0x09_U8, 0x0a_U8, 0x0b_U8, 0x0c_U8, 0x0d_U8, 0x0e_U8, 0x0f_U8], buf.@array);
+    assert_equal("size", 15, buf.get_size);;
+    assert_equal("position", 15, buf.get_position);;
+    assert_equal("array", [0x01_U8, 0x02_U8, 0x03_U8, 0x04_U8, 0x05_U8, 0x06_U8, 0x07_U8, 0x08_U8,
+                        0x09_U8, 0x0a_U8, 0x0b_U8, 0x0c_U8, 0x0d_U8, 0x0e_U8, 0x0f_U8], buf.@array);;
     pure()
 );
 
@@ -67,16 +67,16 @@ test_unmarshal = (
     let array = [0x01_U8, 0x02_U8, 0x03_U8, 0x04_U8, 0x05_U8, 0x06_U8, 0x07_U8, 0x08_U8,
                     0x09_U8, 0x0a_U8, 0x0b_U8, 0x0c_U8, 0x0d_U8, 0x0e_U8, 0x0f_U8];
     let buf = ByteBuffer::make(array, ByteOrder::big_endian());
-    let _ = *assert_equal("position", 0, buf.get_position);
+    assert_equal("position", 0, buf.get_position);;
     let (val:U8, buf) = *buf.unmarshal.from_result;
-    let _ = *assert_equal("u8", 0x01_U8, val);
+    assert_equal("u8", 0x01_U8, val);;
     let (val:U16, buf) = *buf.unmarshal.from_result;
-    let _ = *assert_equal("u16", 0x0203_U16, val);
+    assert_equal("u16", 0x0203_U16, val);;
     let (val:U32, buf) = *buf.unmarshal.from_result;
-    let _ = *assert_equal("u32", 0x04050607_U32, val);
+    assert_equal("u32", 0x04050607_U32, val);;
     let (val:U64, buf) = *buf.unmarshal.from_result;
-    let _ = *assert_equal("u64", 0x08090a0b0c0d0e0f_U64, val);
-    let _ = *assert_equal("position", 15, buf.get_position);
+    assert_equal("u64", 0x08090a0b0c0d0e0f_U64, val);;
+    assert_equal("position", 15, buf.get_position);;
     pure()
 );
 
