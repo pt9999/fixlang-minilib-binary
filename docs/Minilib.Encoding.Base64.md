@@ -1,6 +1,6 @@
 # Minilib.Encoding.Base64
 
-Defined in minilib-binary@0.5.4
+Defined in minilib-binary@0.5.5
 
 BASE64 encoding and decoding
 
