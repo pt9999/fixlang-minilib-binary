@@ -2,18 +2,19 @@
 module Minilib.Encoding.Base64;
 
 import Minilib.Text.Hex;
+import Minilib.Text.StringEx;
 
 // Encodes a byte array to a BASE64 string.
 base64_encode: Array U8 -> String;
 base64_encode = |src| (
     let src_size = src.get_size;
     let dest_size = (src_size + 2) / 3 * 4;
-    let dest = Array::fill(dest_size + 1, 0_U8); // +1 for null terminator
-    let dest = loop(
+    let dest = Array::fill(dest_size, 0_U8);
+    loop(
         (dest, 0, 0), |(dest, src_idx, dest_idx)|
         if src_idx >= src_size {
             if dest_size != dest_idx { undefined("dest_size mismatch") };
-            break $ dest
+            break $ dest.StringEx::from_array
         };
         let has_b1 = (src_idx + 1 < src_size);
         let has_b2 = (src_idx + 2 < src_size);
@@ -29,16 +30,15 @@ base64_encode = |src| (
                         .set(dest_idx + 2, if has_b1 { u2 } else { '=' })
                         .set(dest_idx + 3, if has_b2 { u3 } else { '=' });
         continue $ (dest, src_idx + 3, dest_idx + 4)
-    );
-    dest._unsafe_from_c_str
+    )
 );
 
 // Decodes a string which contains BASE64 characters to a byte array.
 // Characters other than BASE64 are ignored.
 base64_decode: String -> Array U8;
 base64_decode = |str| (
-    let src = str.get_bytes.map(|u8| _u8_to_b64_table.@(u8.to_I64))
-                ._filter_array(|b64| b64 != 0xFF_U8);
+    let src = str.to_iter.map(|u8| _u8_to_b64_table.@(u8.to_I64))
+                .filter(|b64| b64 != 0xFF_U8).to_array;
     let src_size = src.get_size;
     let dest_size = src_size * 3 / 4;
     let dest = Array::fill(dest_size, 0_U8);
@@ -58,20 +58,6 @@ base64_decode = |str| (
     );
     if dest_size != dest.get_size { undefined("dest_size mismatch") };
     dest
-);
-
-// Same as `to_iter >> filter(f) >> to_array`, but faster.
-_filter_array: (a -> Bool) -> Array a -> Array a;
-_filter_array = |f, arr| (
-    let n = arr.get_size;
-    let output = Array::empty(n);
-    loop(
-        (output, 0), |(output, i)|
-        if i >= n { break $ output };
-        let x = arr.@(i);
-        let output = if f(x) { output.push_back(x) } else { output };
-        continue $ (output, i + 1)
-    )
 );
 
 // [0..63] -> [0..255]

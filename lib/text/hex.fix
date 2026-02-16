@@ -4,11 +4,12 @@ module Minilib.Text.Hex;
 import Character;
 
 import Minilib.Text.StringEx;
+import Minilib.Trait.Traversable;
 
 // Converts a 4bit number (0..15) to a hex character ('0'..'9', 'a'..'f').
 encode_hex_char: U8 -> U8;
 encode_hex_char =
-    let hex_chars = "0123456789abcdef".get_bytes.pop_back
+    let hex_chars = "0123456789abcdef".to_array
     in |c| hex_chars.@(c.bit_and(15_U8).to_I64);
 
 // Converts a hex character ('0'..'9', 'A'..'F' or 'a'..'f') to a 4bit number (0..15).
@@ -31,7 +32,6 @@ _from_string_hex = |n, input| (
     if input.get_size > n {
         err $ "Too long string"
     };
-    let input = input.get_bytes.pop_back;
     input.to_iter.fold_m(
         0_U64, |c, output|
         let c = *decode_hex_char(c);
@@ -44,18 +44,12 @@ _from_string_hex = |n, input| (
 // Whitespaces are ignored.
 _array_from_string_hex: [a: FromStringHex] I64 -> String -> Result ErrMsg (Array a);
 _array_from_string_hex = |n, input| (
-    let input = input.get_bytes.pop_back.to_iter.filter(|c| !is_space(c)).to_array._unsafe_to_string;
+    let input: String = input.to_iter.filter(|c| !is_space(c)).from_iter;
     let count = (input.get_size + n - 1) / n;
-    loop_m(
-        (Array::empty(count), 0), |(array, i)|
-        if i >= count { break_m $ array };
-        let hex_str = input.get_sub(i * n, (i + 1) * n);
-        let value = *hex_str.from_string_hex;
-        let array = array.push_back(value);
-        continue_m $ (array, i + 1)
+    range(0, count).to_array.map_m(|i|
+        input.get_sub(i * n, (i + 1) * n).from_string_hex
     )
 );
-
 
 trait a: FromStringHex {
     from_string_hex: String -> Result ErrMsg a;
@@ -92,16 +86,11 @@ impl Array U8: FromStringHex {
 // to a hex string of `n` characters.
 _to_string_hex: I64 -> U64 -> String;
 _to_string_hex = |n, input| (
-    loop(
-        (Array::empty(n + 1), 0), |(output, i)|
-        if i >= n {
-            break $ output._unsafe_to_string
-        };
+    range(0, n).map(|i|
         let shift = (4 * (n - 1 - i)).to_U64;
         let h = input.shift_right(shift).bit_and(15_U64).to_U8;
-        let output = output.push_back(encode_hex_char(h));
-        continue $ (output, i + 1)
-    )
+        encode_hex_char(h)
+    ).to_array.from_array
 );
 
 trait a: ToStringHex {
