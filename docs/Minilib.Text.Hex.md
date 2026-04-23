@@ -1,6 +1,6 @@
 # Minilib.Text.Hex
 
-Defined in minilib-binary@0.6.1
+Defined in minilib-binary@0.6.2
 
 Hexadecimal string conversion
 
@@ -26,11 +26,15 @@ Converts a 4bit number (0..15) to a hex character ('0'..'9', 'a'..'f').
 
 Type: `[a : Minilib.Text.Hex::FromStringHex] Std::String -> Std::Result Std::ErrMsg a`
 
+Trait member of `Minilib.Text.Hex::FromStringHex`
+
 ### namespace Minilib.Text.Hex::ToStringHex
 
 #### to_string_hex
 
 Type: `[a : Minilib.Text.Hex::ToStringHex] a -> Std::String`
+
+Trait member of `Minilib.Text.Hex::ToStringHex`
 
 ## Types and aliases
 

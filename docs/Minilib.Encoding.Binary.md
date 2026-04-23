@@ -1,6 +1,6 @@
 # Minilib.Encoding.Binary
 
-Defined in minilib-binary@0.6.1
+Defined in minilib-binary@0.6.2
 
 Binary utility, such as:
 - Byte order
@@ -223,6 +223,8 @@ Type: `Minilib.Encoding.Binary::ByteBuffer -> Std::Array Std::U8`
 
 Type: `[a : Minilib.Encoding.Binary::Marshal] a -> Minilib.Encoding.Binary::ByteBuffer -> Minilib.Encoding.Binary::ByteBuffer`
 
+Trait member of `Minilib.Encoding.Binary::Marshal`
+
 Encodes a value to the byte buffer.
 
 ### namespace Minilib.Encoding.Binary::Unmarshal
@@ -230,6 +232,8 @@ Encodes a value to the byte buffer.
 #### unmarshal
 
 Type: `[a : Minilib.Encoding.Binary::Unmarshal] Minilib.Encoding.Binary::ByteBuffer -> Std::Result Std::ErrMsg (a, Minilib.Encoding.Binary::ByteBuffer)`
+
+Trait member of `Minilib.Encoding.Binary::Unmarshal`
 
 Decodes a value from the byte buffer.
 
