@@ -1,3 +1,7 @@
+## 0.6.2
+### Changed
+- Utilized minilib-common@0.13.0.
+
 ## 0.6.1
 ### Changed
 - Utilized minilib-common@0.12.3.
