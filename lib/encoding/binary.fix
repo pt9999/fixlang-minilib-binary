@@ -14,11 +14,11 @@ type ByteOrder = unbox union {
 // A type of byte buffer that supports encoding values to/decoding values from memory.
 type ByteBuffer = unbox struct {
     // internal byte array
-    array: Array U8,            
+    array: Array U8,
     // byte order
-    byte_order: ByteOrder,      
+    byte_order: ByteOrder,
     // read/write position
-    position: I64               
+    position: I64
 };
 
 namespace ByteBuffer {
@@ -27,7 +27,7 @@ namespace ByteBuffer {
     // - The byte order is `byte_order`
     make: Array U8 -> ByteOrder -> ByteBuffer;
     make = |array, byte_order| (
-        ByteBuffer { 
+        ByteBuffer {
             array: array,
             byte_order: byte_order,
             position: 0
@@ -60,14 +60,18 @@ namespace ByteBuffer {
     //set_position = set_position;
 
     // Gets the size of internal byte array.
+    @size: ByteBuffer -> I64;
+    @size = |buf| buf.@array.@size;
+
+    // Synonym of `ByteBuffer::@size`.
     get_size: ByteBuffer -> I64;
-    get_size = |buf| buf.@array.get_size;
+    get_size = ByteBuffer::@size;
 
     // `buf.ensure_size(req_size)` ensures that the size of the byte buffer is at least `req_size`.
     // If not, appends zeros at the end of the byte buffer.
     ensure_size: I64 -> ByteBuffer -> ByteBuffer;
     ensure_size = |req_size, buf| (
-        let append_size = max(0, req_size - buf.get_size);
+        let append_size = max(0, req_size - buf.@size);
         if append_size <= 0 { buf };
         loop(
             (buf, 0), |(buf, i)|
@@ -84,40 +88,40 @@ namespace ByteBuffer {
     // Decodes U8 from the byte buffer at position `i`.
     get_u8: I64 -> ByteBuffer -> U8;
     get_u8 = |i, buf| (
-        if buf.@byte_order.is_little_endian { 
-            get_u8_le(i, buf.@array) 
+        if buf.@byte_order.is_little_endian {
+            get_u8_le(i, buf.@array)
         } else {
-            get_u8_be(i, buf.@array) 
+            get_u8_be(i, buf.@array)
         }
     );
 
     // Decodes U16 from the byte buffer at position `i`.
     get_u16: I64 -> ByteBuffer -> U16;
     get_u16 = |i, buf| (
-        if buf.@byte_order.is_little_endian { 
-            get_u16_le(i, buf.@array) 
+        if buf.@byte_order.is_little_endian {
+            get_u16_le(i, buf.@array)
         } else {
-            get_u16_be(i, buf.@array) 
+            get_u16_be(i, buf.@array)
         }
     );
 
     // Decodes U32 from the byte buffer at position `i`.
     get_u32: I64 -> ByteBuffer -> U32;
     get_u32 = |i, buf| (
-        if buf.@byte_order.is_little_endian { 
-            get_u32_le(i, buf.@array) 
+        if buf.@byte_order.is_little_endian {
+            get_u32_le(i, buf.@array)
         } else {
-            get_u32_be(i, buf.@array) 
+            get_u32_be(i, buf.@array)
         }
     );
 
     // Decodes U64 from the byte buffer at position `i`.
     get_u64: I64 -> ByteBuffer -> U64;
     get_u64 = |i, buf| (
-        if buf.@byte_order.is_little_endian { 
-            get_u64_le(i, buf.@array) 
+        if buf.@byte_order.is_little_endian {
+            get_u64_le(i, buf.@array)
         } else {
-            get_u64_be(i, buf.@array) 
+            get_u64_be(i, buf.@array)
         }
     );
 
@@ -125,7 +129,7 @@ namespace ByteBuffer {
     _unmarshal: (I64 -> ByteBuffer -> a) -> I64 -> ByteBuffer -> Result ErrMsg (a, ByteBuffer);
     _unmarshal = |get_val, size, buf| (
         let pos = buf.get_position;
-        if pos + size > buf.get_size { err $ "end of data reached: " + (pos, size, buf.get_size).to_string };
+        if pos + size > buf.@size { err $ "end of data reached: " + (pos, size, buf.@size).to_string };
         let val = buf.get_val(pos);
         let buf = buf.set_position(pos + size);
         pure $ (val, buf)
@@ -134,7 +138,7 @@ namespace ByteBuffer {
     // Encodes U8 into the byte buffer at position `i`.
     set_u8: I64 -> U8 -> ByteBuffer -> ByteBuffer;
     set_u8 = |i, val, buf| (
-        if buf.@byte_order.is_little_endian { 
+        if buf.@byte_order.is_little_endian {
             buf.mod_array(set_u8_le(i, val))
         } else {
             buf.mod_array(set_u8_be(i, val))
@@ -144,17 +148,17 @@ namespace ByteBuffer {
     // Encodes U16 into the byte buffer at position `i`.
     set_u16: I64 -> U16 -> ByteBuffer -> ByteBuffer;
     set_u16 = |i, val, buf| (
-        if buf.@byte_order.is_little_endian { 
+        if buf.@byte_order.is_little_endian {
             buf.mod_array(set_u16_le(i, val))
         } else {
             buf.mod_array(set_u16_be(i, val))
         }
     );
-    
+
     // Encodes U32 into the byte buffer at position `i`.
     set_u32: I64 -> U32 -> ByteBuffer -> ByteBuffer;
     set_u32 = |i, val, buf| (
-        if buf.@byte_order.is_little_endian { 
+        if buf.@byte_order.is_little_endian {
             buf.mod_array(set_u32_le(i, val))
         } else {
             buf.mod_array(set_u32_be(i, val))
@@ -164,7 +168,7 @@ namespace ByteBuffer {
     // Encodes U64 into the byte buffer at position `i`.
     set_u64: I64 -> U64 -> ByteBuffer -> ByteBuffer;
     set_u64 = |i, val, buf| (
-        if buf.@byte_order.is_little_endian { 
+        if buf.@byte_order.is_little_endian {
             buf.mod_array(set_u64_le(i, val))
         } else {
             buf.mod_array(set_u64_be(i, val))
@@ -186,7 +190,7 @@ namespace ByteBuffer {
 
     to_u32_array: ByteBuffer -> Array U32;
     to_u32_array = |buf| (
-        let n = buf.get_size;
+        let n = buf.@size;
         if !(n.bit_and(3) == 0) { undefined("invalid size") };
         let u32array = Array::empty(n.shift_right(2));
         loop(
@@ -201,7 +205,7 @@ namespace ByteBuffer {
 
     from_u32_array: Array U32 -> ByteOrder -> ByteBuffer;
     from_u32_array = |u32array, byte_order| (
-        let n = u32array.get_size;
+        let n = u32array.@size;
         let buf = ByteBuffer::fill(n.shift_left(2), 0_U8, byte_order);
         loop(
             (buf, 0), |(buf, i)|
@@ -274,24 +278,24 @@ get_u8_le = |i, array| (
 // Decodes U16 from `array` at position `i` with little endian.
 get_u16_le: I64 -> Array U8 -> U16;
 get_u16_le = |i, array| (
-    array.get_u8_le(i).to_U16.bit_or(
-        array.get_u8_le(i + 1).to_U16.shift_left(8_U16)
+    array.get_u8_le(i).u16.bit_or(
+        array.get_u8_le(i + 1).u16.shift_left(8_U16)
     )
 );
 
 // Decodes U32 from `array` at position `i` with little endian.
 get_u32_le: I64 -> Array U8 -> U32;
 get_u32_le = |i, array| (
-    array.get_u16_le(i).to_U32.bit_or(
-        array.get_u16_le(i + 2).to_U32.shift_left(16_U32)
+    array.get_u16_le(i).u32.bit_or(
+        array.get_u16_le(i + 2).u32.shift_left(16_U32)
     )
 );
 
 // Decodes U64 from `array` at position `i` with little endian.
 get_u64_le: I64 -> Array U8 -> U64;
 get_u64_le = |i, array| (
-    array.get_u32_le(i).to_U64.bit_or(
-        array.get_u32_le(i + 4).to_U64.shift_left(32_U64)
+    array.get_u32_le(i).u64.bit_or(
+        array.get_u32_le(i + 4).u64.shift_left(32_U64)
     )
 );
 
@@ -304,22 +308,22 @@ set_u8_le = |i, val, array| (
 // Encodes U16 into `array` at position `i` with little endian.
 set_u16_le: I64 -> U16 -> Array U8 -> Array U8;
 set_u16_le = |i, val, array| (
-    array.set_u8_le(i, val.to_U8)
-         .set_u8_le(i + 1, val.shift_right(8_U16).to_U8)
+    array.set_u8_le(i, val.u8)
+         .set_u8_le(i + 1, val.shift_right(8_U16).u8)
 );
 
 // Encodes U32 into `array` at position `i` with little endian.
 set_u32_le: I64 -> U32 -> Array U8 -> Array U8;
 set_u32_le = |i, val, array| (
-    array.set_u16_le(i, val.to_U16)
-         .set_u16_le(i + 2, val.shift_right(16_U32).to_U16)
+    array.set_u16_le(i, val.u16)
+         .set_u16_le(i + 2, val.shift_right(16_U32).u16)
 );
 
 // Encodes U64 into `array` at position `i` with little endian.
 set_u64_le: I64 -> U64 -> Array U8 -> Array U8;
 set_u64_le = |i, val, array| (
-    array.set_u32_le(i, val.to_U32)
-         .set_u32_le(i + 4, val.shift_right(32_U64).to_U32)
+    array.set_u32_le(i, val.u32)
+         .set_u32_le(i + 4, val.shift_right(32_U64).u32)
 );
 
 //-----------------------------------------------------------
@@ -335,24 +339,24 @@ get_u8_be = |i, array| (
 // Decodes U16 from `array` at position `i` with big endian.
 get_u16_be: I64 -> Array U8 -> U16;
 get_u16_be = |i, array| (
-    array.get_u8_be(i).to_U16.shift_left(8_U16).bit_or(
-        array.get_u8_be(i + 1).to_U16
+    array.get_u8_be(i).u16.shift_left(8_U16).bit_or(
+        array.get_u8_be(i + 1).u16
     )
 );
 
 // Decodes U32 from `array` at position `i` with big endian.
 get_u32_be: I64 -> Array U8 -> U32;
 get_u32_be = |i, array| (
-    array.get_u16_be(i).to_U32.shift_left(16_U32).bit_or(
-        array.get_u16_be(i + 2).to_U32
+    array.get_u16_be(i).u32.shift_left(16_U32).bit_or(
+        array.get_u16_be(i + 2).u32
     )
 );
 
 // Decodes U64 from `array` at position `i` with big endian.
 get_u64_be: I64 -> Array U8 -> U64;
 get_u64_be = |i, array| (
-    array.get_u32_be(i).to_U64.shift_left(32_U64).bit_or(
-        array.get_u32_be(i + 4).to_U64
+    array.get_u32_be(i).u64.shift_left(32_U64).bit_or(
+        array.get_u32_be(i + 4).u64
     )
 );
 
@@ -366,20 +370,20 @@ set_u8_be = |i, val, array| (
 // Encodes U16 into `array` at position `i` with big endian.
 set_u16_be: I64 -> U16 -> Array U8 -> Array U8;
 set_u16_be = |i, val, array| (
-    array.set_u8_be(i, val.shift_right(8_U16).to_U8)
-         .set_u8_be(i + 1, val.to_U8)
+    array.set_u8_be(i, val.shift_right(8_U16).u8)
+         .set_u8_be(i + 1, val.u8)
 );
 
 // Encodes U32 into `array` at position `i` with big endian.
 set_u32_be: I64 -> U32 -> Array U8 -> Array U8;
 set_u32_be = |i, val, array| (
-    array.set_u16_be(i, val.shift_right(16_U32).to_U16)
-         .set_u16_be(i + 2, val.to_U16)
+    array.set_u16_be(i, val.shift_right(16_U32).u16)
+         .set_u16_be(i + 2, val.u16)
 );
 
 // Encodes U64 into `array` at position `i` with big endian.
 set_u64_be: I64 -> U64 -> Array U8 -> Array U8;
 set_u64_be = |i, val, array| (
-    array.set_u32_be(i, val.shift_right(32_U64).to_U32)
-         .set_u32_be(i + 4, val.to_U32)
+    array.set_u32_be(i, val.shift_right(32_U64).u32)
+         .set_u32_be(i + 4, val.u32)
 );

@@ -8,7 +8,7 @@ import Minilib.Testing.UnitTest;
 test_byte_buffer_get: TestCase;
 test_byte_buffer_get = (
     make_test("test_byte_buffer_get") $ |_|
-    let array = Array::from_map(256, |i| i.to_U8);
+    let array = Array::from_map(256, ToU8::u8);
     let buf = ByteBuffer::make(array, ByteOrder::little_endian());
     assert_equal("le get_u8", 0x41_U8, buf.get_u8(0x41));;
     assert_equal("le get_u16", 0x4241_U16, buf.get_u16(0x41));;
@@ -54,7 +54,7 @@ test_marshal = (
     let buf = buf.marshal(0x0203_U16);
     let buf = buf.marshal(0x04050607_U32);
     let buf = buf.marshal(0x08090a0b0c0d0e0f_U64);
-    assert_equal("size", 15, buf.get_size);;
+    assert_equal("size", 15, buf.@size);;
     assert_equal("position", 15, buf.get_position);;
     assert_equal("array", [0x01_U8, 0x02_U8, 0x03_U8, 0x04_U8, 0x05_U8, 0x06_U8, 0x07_U8, 0x08_U8,
                         0x09_U8, 0x0a_U8, 0x0b_U8, 0x0c_U8, 0x0d_U8, 0x0e_U8, 0x0f_U8], buf.@array);;

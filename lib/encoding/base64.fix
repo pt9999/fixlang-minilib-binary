@@ -7,7 +7,7 @@ import Minilib.Text.StringEx;
 // Encodes a byte array to a BASE64 string.
 base64_encode: Array U8 -> String;
 base64_encode = |src| (
-    let src_size = src.get_size;
+    let src_size = src.@size;
     let dest_size = (src_size + 2) / 3 * 4;
     let dest = Array::fill(dest_size, 0_U8);
     loop(
@@ -21,10 +21,10 @@ base64_encode = |src| (
         let b0 = src.@(src_idx);
         let b1 = if has_b1 { src.@(src_idx + 1) } else { 0_U8 };
         let b2 = if has_b2 { src.@(src_idx + 2) } else { 0_U8 };
-        let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).to_I64);
-        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).bit_and(63_U8).to_I64);
-        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_or(b2.shift_right(6_U8)).bit_and(63_U8).to_I64);
-        let u3 = _b64_to_u8_table.@(b2.bit_and(63_U8).to_I64);
+        let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).i64);
+        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).bit_and(63_U8).i64);
+        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_or(b2.shift_right(6_U8)).bit_and(63_U8).i64);
+        let u3 = _b64_to_u8_table.@(b2.bit_and(63_U8).i64);
         let dest = dest.set(dest_idx, u0)
                         .set(dest_idx + 1, u1)
                         .set(dest_idx + 2, if has_b1 { u2 } else { '=' })
@@ -37,9 +37,9 @@ base64_encode = |src| (
 // Characters other than BASE64 are ignored.
 base64_decode: String -> Array U8;
 base64_decode = |str| (
-    let src = str.to_iter.map(|u8| _u8_to_b64_table.@(u8.to_I64))
+    let src = str.to_iter.map(|u8| _u8_to_b64_table.@(u8.i64))
                 .filter(|b64| b64 != 0xFF_U8).to_array;
-    let src_size = src.get_size;
+    let src_size = src.@size;
     let dest_size = src_size * 3 / 4;
     let dest = Array::fill(dest_size, 0_U8);
     let dest = loop(
@@ -56,7 +56,7 @@ base64_decode = |str| (
         let dest = dest.set(dest_idx + 2, b2.bit_and(0x03_U8).shift_left(6_U8).bit_or(b3));
         continue $ (dest, src_idx + 4, dest_idx + 3)
     );
-    if dest_size != dest.get_size { undefined("dest_size mismatch") };
+    if dest_size != dest.@size { undefined("dest_size mismatch") };
     dest
 );
 
@@ -64,9 +64,9 @@ base64_decode = |str| (
 _b64_to_u8_table: Array U8;
 _b64_to_u8_table = (
     Array::from_map(64, |i|
-        if i < 26 { 'A' + i.to_U8 };
-        if i < 52 { 'a' + (i - 26).to_U8 };
-        if i < 62 { '0' + (i - 52).to_U8 };
+        if i < 26 { 'A' + i.u8 };
+        if i < 52 { 'a' + (i - 26).u8 };
+        if i < 62 { '0' + (i - 52).u8 };
         if i == 62 { '+' } else { '/' }
     )
 );
@@ -76,7 +76,7 @@ _u8_to_b64_table: Array U8;
 _u8_to_b64_table = (
     Iterator::range(0, 64).fold(
         Array::fill(256, 0xFF_U8), |b64, arr|
-        let u8 = _b64_to_u8_table.@(b64);
-        arr.set(u8.to_I64, b64.to_U8)
+        let val = _b64_to_u8_table.@(b64).i64;
+        arr.set(val, b64.u8)
     )
 );

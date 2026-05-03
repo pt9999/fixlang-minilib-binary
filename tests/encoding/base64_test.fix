@@ -59,7 +59,7 @@ test_base64_perf = (
     make_test("test_base64_perf") $ |_|
     let time_limit = 0.3;
     let n = 1e6;
-    let bytes = Array::from_map(n, I64::to_U8);
+    let bytes = Array::from_map(n, ToU8::u8);
     let (base64, time) = *measure_time(time_limit, |_| base64_encode(bytes));
     println((n, time).format("test_base64_perf: encode n={} time={} sec")).lift;;
     let (bytes2, time) = *measure_time(time_limit, |_| base64_decode(base64));

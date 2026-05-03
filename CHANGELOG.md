@@ -1,6 +1,9 @@
 ## 0.6.4
+### Added
+- Minilib.Encoding.Binary: Added `ByteBuffer::@size`.
 ### Changed
 - Upgraded to minilib-common@0.13.2.
+- Modified some code to remove the deprecation warnings.
 
 ## 0.6.2
 ### Changed
