@@ -1,6 +1,6 @@
 # Minilib.Encoding.Binary
 
-Defined in minilib-binary@0.6.3
+Defined in minilib-binary@0.6.4
 
 Binary utility, such as:
 - Byte order
@@ -108,6 +108,12 @@ Encodes U8 into `array` at position `i` with little endian.
 
 ### namespace Minilib.Encoding.Binary::ByteBuffer
 
+#### @size
+
+Type: `Minilib.Encoding.Binary::ByteBuffer -> Std::I64`
+
+Gets the size of internal byte array.
+
 #### empty
 
 Type: `Std::I64 -> Minilib.Encoding.Binary::ByteOrder -> Minilib.Encoding.Binary::ByteBuffer`
@@ -151,7 +157,7 @@ Gets the read/write position.
 
 Type: `Minilib.Encoding.Binary::ByteBuffer -> Std::I64`
 
-Gets the size of internal byte array.
+Synonym of `ByteBuffer::@size`.
 
 #### get_u16
 
