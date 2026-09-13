@@ -10,8 +10,8 @@
 // multiple of three ends in a group of one or two bytes, which the padding character `=` fills out
 // to four characters; a string may likewise end in a group of two or three pieces.
 //
-// A group of characters is *whole* when each of its four characters stands for a piece. That is
-// where a reading is three bytes at once; elsewhere it goes one character at a time, since a
+// A group of characters is *unbroken* when each of its four characters stands for a piece. That
+// is where a reading is three bytes at once; elsewhere it goes one character at a time, since a
 // character standing for no piece is passed over and the pieces around it close up.
 module Minilib.Encoding.Base64;
 
@@ -72,19 +72,20 @@ base64_decode = |str| (
     // Four six-bit pieces are three bytes, and a character standing for no piece only lowers the
     // count of pieces, so the string holds at most this many bytes however many of them it carries.
     let dest = Array::fill(src_size * 3 / 4, 0_U8);
-    // The run of whole groups is walked three bytes at a time, and the group that ends that run --
+    // The run of unbroken groups is walked three bytes at a time, and the group that breaks it --
     // one holding a character that stands for no piece, or the short one the string ends in -- a
-    // character at a time. Either walk leaves the reading at the first character of a group.
+    // character at a time. Either walk leaves the reading at the first character of a group, or at
+    // the end of the string, which the round after it reads as the end of the walk.
     let (dest, dest_idx) = loop(
         (0, dest, 0), |(src_idx, dest, dest_idx)|
-        let (src_idx, dest, dest_idx) = _whole_groups(src, src_size, src_idx, dest, dest_idx);
         if src_idx == src_size { break $ (dest, dest_idx) };
+        let (src_idx, dest, dest_idx) = _unbroken_groups(src, src_size, src_idx, dest, dest_idx);
         continue $ _one_group(src, src_size, src_idx, dest, dest_idx)
     );
     dest.truncate(dest_idx)
 );
 
-// Writes the bytes of every whole group from `src_idx` onwards.
+// Writes the bytes of every unbroken group from `src_idx` onwards.
 //
 // # Parameters
 // * `src` - The characters to read.
@@ -97,11 +98,11 @@ base64_decode = |str| (
 // # Returns
 // A three-tuple saying where the walk stopped.
 // * `@0` - Where to read next: the end of the string, or the first character of a group that is
-//   not whole.
-// * `@1` - The bytes, three of them written for each whole group the walk took.
+//   broken.
+// * `@1` - The bytes, three of them written for each unbroken group the walk took.
 // * `@2` - Where the next byte goes.
-_whole_groups: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
-_whole_groups = |src, src_size, src_idx, dest, dest_idx| (
+_unbroken_groups: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
+_unbroken_groups = |src, src_size, src_idx, dest, dest_idx| (
     loop((src_idx, dest, dest_idx), |(src_idx, dest, dest_idx)|
         if src_idx + 4 > src_size { break $ (src_idx, dest, dest_idx) };
         let p0 = _u8_to_b64_table.@(src.@(src_idx).i64);
@@ -128,7 +129,8 @@ _whole_groups = |src, src_size, src_idx, dest, dest_idx| (
 // * `src` - The characters to read.
 // * `src_size` - How many characters the string holds, which is one less than `src.@size`: the
 //   bytes of a string carry its null terminator.
-// * `src_idx` - Where to read from, which is the first character of a group.
+// * `src_idx` - Where to read from: the first character of a group, or the end of the string,
+//   which leaves the bytes as they are.
 // * `dest` - The bytes written so far.
 // * `dest_idx` - Where the next byte goes.
 //
