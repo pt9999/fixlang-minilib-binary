@@ -72,34 +72,15 @@ base64_decode = |str| (
     // Four six-bit pieces are three bytes, and a character standing for no piece only lowers the
     // count of pieces, so the string holds at most this many bytes however many of them it carries.
     let dest = Array::fill(src_size * 3 / 4, 0_U8);
-    // `acc` holds the `filled` pieces read since the last three bytes were written.
-    let (dest, dest_idx, acc, filled) = loop(
-        (0, dest, 0, 0, 0), |(src_idx, dest, dest_idx, acc, filled)|
-        // The run of whole groups is walked on its own, so that the walk carries the two indices
-        // and nothing else. It ends at a group that is not whole, which the reading below then
-        // takes one character at a time.
-        let (src_idx, dest, dest_idx) = if filled == 0 {
-            _whole_groups(src, src_size, src_idx, dest, dest_idx)
-        } else { (src_idx, dest, dest_idx) };
-        if src_idx == src_size { break $ (dest, dest_idx, acc, filled) };
-        let piece = _u8_to_b64_table.@(src.@(src_idx).i64);
-        if piece == 0xFF_U8 { continue $ (src_idx + 1, dest, dest_idx, acc, filled) };
-        let acc = acc.shift_left(6).bit_or(piece.i64);
-        if filled < 3 { continue $ (src_idx + 1, dest, dest_idx, acc, filled + 1) };
-        let dest = dest.set(dest_idx, acc.shift_right(16).u8)
-                        .set(dest_idx + 1, acc.shift_right(8).bit_and(255).u8)
-                        .set(dest_idx + 2, acc.bit_and(255).u8);
-        continue $ (src_idx + 1, dest, dest_idx + 3, 0, 0)
+    // The run of whole groups is walked three bytes at a time, and the group that ends that run --
+    // one holding a character that stands for no piece, or the short one the string ends in -- a
+    // character at a time. Either walk leaves the reading at the first character of a group.
+    let (dest, dest_idx) = loop(
+        (0, dest, 0), |(src_idx, dest, dest_idx)|
+        let (src_idx, dest, dest_idx) = _whole_groups(src, src_size, src_idx, dest, dest_idx);
+        if src_idx == src_size { break $ (dest, dest_idx) };
+        continue $ _one_group(src, src_size, src_idx, dest, dest_idx)
     );
-    // The two or three pieces a last, padded group leaves, which are one or two whole bytes.
-    let (dest, dest_idx) = if filled == 2 {
-        (dest.set(dest_idx, acc.shift_right(4).u8), dest_idx + 1)
-    } else if filled == 3 {
-        (dest.set(dest_idx, acc.shift_right(10).u8)
-             .set(dest_idx + 1, acc.shift_right(2).bit_and(255).u8), dest_idx + 2)
-    } else {
-        (dest, dest_idx)
-    };
     dest.truncate(dest_idx)
 );
 
@@ -134,6 +115,55 @@ _whole_groups = |src, src_size, src_idx, dest, dest_idx| (
                         .set(dest_idx + 2, p2.shift_left(6_U8).bit_or(p3));
         continue $ (src_idx + 4, dest, dest_idx + 3)
     )
+);
+
+// Writes the bytes of the one group that starts at `src_idx`, passing over the characters in it
+// that stand for no piece.
+//
+// Four pieces are three bytes. A group the string ends before its fourth piece is what a padded
+// last group leaves: three pieces are two bytes, two pieces are one byte, and a single piece is
+// six bits, which is no byte at all.
+//
+// # Parameters
+// * `src` - The characters to read.
+// * `src_size` - How many characters the string holds, which is one less than `src.@size`: the
+//   bytes of a string carry its null terminator.
+// * `src_idx` - Where to read from, which is the first character of a group.
+// * `dest` - The bytes written so far.
+// * `dest_idx` - Where the next byte goes.
+//
+// # Returns
+// A three-tuple saying where the reading stopped.
+// * `@0` - Where to read next: the first character of the group after this one, or the end of the
+//   string.
+// * `@1` - The bytes, with the ones this group holds written.
+// * `@2` - Where the next byte goes.
+_one_group: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
+_one_group = |src, src_size, src_idx, dest, dest_idx| (
+    // `acc` holds the `filled` pieces read so far, six bits each.
+    let (src_idx, acc, filled) = loop(
+        (src_idx, 0, 0), |(src_idx, acc, filled)|
+        if filled == 4 { break $ (src_idx, acc, filled) };
+        if src_idx == src_size { break $ (src_idx, acc, filled) };
+        let piece = _u8_to_b64_table.@(src.@(src_idx).i64);
+        if piece == 0xFF_U8 { continue $ (src_idx + 1, acc, filled) };
+        continue $ (src_idx + 1, acc.shift_left(6).bit_or(piece.i64), filled + 1)
+    );
+    if filled == 4 {
+        let dest = dest.set(dest_idx, acc.shift_right(16).u8)
+                        .set(dest_idx + 1, acc.shift_right(8).bit_and(255).u8)
+                        .set(dest_idx + 2, acc.bit_and(255).u8);
+        (src_idx, dest, dest_idx + 3)
+    };
+    if filled == 3 {
+        let dest = dest.set(dest_idx, acc.shift_right(10).u8)
+                        .set(dest_idx + 1, acc.shift_right(2).bit_and(255).u8);
+        (src_idx, dest, dest_idx + 2)
+    };
+    if filled == 2 {
+        (src_idx, dest.set(dest_idx, acc.shift_right(4).u8), dest_idx + 1)
+    };
+    (src_idx, dest, dest_idx)
 );
 
 // The BASE64 character that each six-bit piece is written as.
