@@ -165,7 +165,9 @@ _one_group = |src, src_size, src_idx, dest, dest_idx| (
     (src_idx, dest, dest_idx)
 );
 
-// The BASE64 character that each six-bit piece is written as, indexed by the piece.
+// The BASE64 character that each six-bit piece is written as.
+//
+// [0..63] -> [0..255]
 _b64_to_u8_table: Array U8;
 _b64_to_u8_table = (
     Array::from_map(64, |i|
@@ -176,8 +178,9 @@ _b64_to_u8_table = (
     )
 );
 
-// The six-bit piece that each BASE64 character stands for, indexed by the character. A character
-// other than BASE64 reads as 0xFF, which is larger than any piece.
+// The six-bit piece that each BASE64 character stands for.
+//
+// [0..255] -> [0..63], or 0xFF if not a BASE64 char
 _u8_to_b64_table: Array U8;
 _u8_to_b64_table = (
     Iterator::range(0, 64).fold(
