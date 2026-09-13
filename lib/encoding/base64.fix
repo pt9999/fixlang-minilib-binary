@@ -5,13 +5,13 @@
 // A *piece* is the six bits that one BASE64 character stands for. `_u8_to_b64_table` reads a
 // character into a piece, and `_b64_to_u8_table` writes a piece back as a character.
 //
-// A *group* is the unit the conversion works in: twenty-four bits, which are three bytes on one
-// side and four pieces -- four characters -- on the other. A byte array whose length is not a
-// multiple of three ends in a group of one or two bytes, which the padding character `=` fills out
-// to four characters; a string may likewise end in a group of two or three pieces.
+// A *group* is the unit the conversion works in: twenty-four bits. That is three bytes on one
+// side, and four pieces -- four characters -- on the other. A byte array whose length is not a
+// multiple of three ends in a group of one or two bytes, and the padding character `=` fills the
+// characters of that group out to four. A string can end in a group of two or three pieces.
 //
 // A group of characters is *unbroken* when each of its four characters stands for a piece. There
-// the reading takes three bytes at a time; elsewhere it goes one character at a time, since a
+// the reading takes three bytes at a time. Elsewhere it goes one character at a time, since a
 // character standing for no piece is passed over and the pieces around it close up.
 module Minilib.Encoding.Base64;
 
@@ -24,7 +24,7 @@ base64_encode = |src| (
     let src_size = src.@size;
     let dest = Array::fill((src_size + 2) / 3 * 4, 0_U8);
     let groups = src_size / 3;
-    // Every three bytes are four characters, each standing for six bits of them.
+    // Every three bytes are four characters, and each character stands for six of their bits.
     let dest = loop((dest, 0, 0), |(dest, src_idx, dest_idx)|
         if src_idx + 3 > src_size { break $ dest };
         let b0 = src.@(src_idx);
@@ -38,7 +38,7 @@ base64_encode = |src| (
                         .set(dest_idx + 2, u2).set(dest_idx + 3, u3);
         continue $ (dest, src_idx + 3, dest_idx + 4)
     );
-    // A last group of one or two bytes, which the padding character fills out to four characters.
+    // A last group of one or two bytes goes here, with `=` filling its characters out to four.
     let src_idx = groups * 3;
     let dest_idx = groups * 4;
     let rest = src_size - src_idx;
@@ -68,8 +68,8 @@ base64_decode: String -> Array U8;
 base64_decode = |str| (
     let src = str.get_bytes;
     let src_size = str.@size;
-    // Four six-bit pieces are three bytes, and a character standing for no piece only lowers the
-    // count of pieces, so the string decodes to at most this many bytes.
+    // Four six-bit pieces are three bytes. A character standing for no piece only lowers the count
+    // of pieces, so the string decodes to at most this many bytes.
     let dest = Array::fill(src_size * 3 / 4, 0_U8);
     // `_unbroken_groups` reads a run of unbroken groups, three bytes at a time. It stops at the
     // group that breaks the run, or at the short group the string ends in. `_one_group` then
@@ -87,18 +87,18 @@ base64_decode = |str| (
 //
 // # Parameters
 // * `src` - The characters to read.
-// * `src_size` - How many characters the string holds, which is one less than `src.@size`: the
-//   bytes of a string carry its null terminator.
-// * `src_idx` - Where to read from.
+// * `src_size` - How many characters the string holds. That is one less than `src.@size`, since
+//   the bytes of a string carry its null terminator.
+// * `src_idx` - The index into `src` to read from.
 // * `dest` - The bytes written so far.
-// * `dest_idx` - Where the next byte goes.
+// * `dest_idx` - The index into `dest` where the next byte goes.
 //
 // # Returns
 // A three-tuple saying where the walk stopped.
-// * `@0` - Where to read next: the end of the string, or the first character of a group that is
-//   broken.
-// * `@1` - The bytes, three of them written for each unbroken group the walk took.
-// * `@2` - Where the next byte goes.
+// * `@0` - The index into `src` to read from next: the end of the string, or the first
+//   character of a group that is broken.
+// * `@1` - `dest`, with three bytes written for each unbroken group the walk read.
+// * `@2` - The index into `dest` where the next byte goes.
 _unbroken_groups: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
 _unbroken_groups = |src, src_size, src_idx, dest, dest_idx| (
     loop((src_idx, dest, dest_idx), |(src_idx, dest, dest_idx)|
@@ -116,28 +116,27 @@ _unbroken_groups = |src, src_size, src_idx, dest, dest_idx| (
     )
 );
 
-// Writes the bytes of the one group that starts at `src_idx`, passing over the characters in it
-// that stand for no piece.
+// Writes the bytes of the one group that starts at `src_idx`, passing over any character in it
+// that stands for no piece.
 //
-// Four pieces are three bytes. A group the string cuts short is what a padded last group leaves:
-// three pieces are two bytes, two pieces are one byte, and a single piece is six bits, which is
-// no byte at all.
+// Four pieces are three bytes. A group the string ends in can hold fewer: three pieces are two
+// bytes, two pieces are one byte, and a single piece is six bits, which is no byte at all.
 //
 // # Parameters
 // * `src` - The characters to read.
-// * `src_size` - How many characters the string holds, which is one less than `src.@size`: the
-//   bytes of a string carry its null terminator.
-// * `src_idx` - Where to read from: the first character of a group, or the end of the string,
-//   which leaves the bytes as they are.
+// * `src_size` - How many characters the string holds. That is one less than `src.@size`, since
+//   the bytes of a string carry its null terminator.
+// * `src_idx` - The index into `src` to read from: the first character of a group, or the end
+//   of the string, which leaves the bytes as they are.
 // * `dest` - The bytes written so far.
-// * `dest_idx` - Where the next byte goes.
+// * `dest_idx` - The index into `dest` where the next byte goes.
 //
 // # Returns
 // A three-tuple saying where the reading stopped.
-// * `@0` - Where to read next: the first character of the group after this one, or the end of the
-//   string.
-// * `@1` - The bytes, with the ones this group holds written.
-// * `@2` - Where the next byte goes.
+// * `@0` - The index into `src` to read from next: the first character of the group after this
+//   one, or the end of the string.
+// * `@1` - `dest`, with the bytes this group stands for written.
+// * `@2` - The index into `dest` where the next byte goes.
 _one_group: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
 _one_group = |src, src_size, src_idx, dest, dest_idx| (
     // `acc` holds the `filled` pieces read so far, six bits each.
@@ -165,7 +164,7 @@ _one_group = |src, src_size, src_idx, dest, dest_idx| (
     (src_idx, dest, dest_idx)
 );
 
-// The BASE64 character that each six-bit piece is written as.
+// The BASE64 character that each six-bit piece is written as, indexed by the piece.
 _b64_to_u8_table: Array U8;
 _b64_to_u8_table = (
     Array::from_map(64, |i|
@@ -176,7 +175,8 @@ _b64_to_u8_table = (
     )
 );
 
-// [0..255] -> [0..63], or 0xFF if not a BASE64 char
+// The six-bit piece that each BASE64 character stands for, indexed by the character. A character
+// standing for no piece reads as 0xFF, which is larger than any piece.
 _u8_to_b64_table: Array U8;
 _u8_to_b64_table = (
     Iterator::range(0, 64).fold(
