@@ -71,10 +71,10 @@ base64_decode = |str| (
     // Four six-bit pieces are three bytes, and a character standing for no piece only lowers the
     // count of pieces, so the string decodes to at most this many bytes.
     let dest = Array::fill(src_size * 3 / 4, 0_U8);
-    // The run of unbroken groups is walked three bytes at a time, and the group that breaks it --
-    // one holding a character that stands for no piece, or the short one the string ends in -- a
-    // character at a time. Either walk leaves the reading at the first character of a group, or at
-    // the end of the string, which the next round reads as the end of the walk.
+    // `_unbroken_groups` reads a run of unbroken groups, three bytes at a time. It stops at the
+    // group that breaks the run, or at the short group the string ends in. `_one_group` then
+    // reads that group, one character at a time. Both stop at the first character of a group,
+    // or at the end of the string, which ends the loop on the next round.
     let (dest, dest_idx) = loop((0, dest, 0), |(src_idx, dest, dest_idx)|
         if src_idx == src_size { break $ (dest, dest_idx) };
         let (src_idx, dest, dest_idx) = _unbroken_groups(src, src_size, src_idx, dest, dest_idx);
