@@ -10,9 +10,9 @@
 // multiple of three ends in a group of one or two bytes, and the padding character `=` fills the
 // characters of that group out to four. A string can end in a group of two or three pieces.
 //
-// A group of characters is *unbroken* when each of its four characters stands for a piece. There
-// the reading takes three bytes at a time. Elsewhere it goes one character at a time, since a
-// character standing for no piece is passed over and the pieces around it close up.
+// A group of characters is *unbroken* when it is four BASE64 characters in a row. A group is
+// *broken* when a character that stands for no piece falls inside it, the padding character `=`
+// among them, or when the string ends before its fourth character.
 module Minilib.Encoding.Base64;
 
 import Minilib.Text.Hex;
@@ -95,8 +95,8 @@ base64_decode = |str| (
 //
 // # Returns
 // A three-tuple saying where the walk stopped.
-// * `@0` - The index into `src` to read from next: the end of the string, or the first
-//   character of a group that is broken.
+// * `@0` - The index into `src` to read from next: the first character of a broken group, or the
+//   end of the string.
 // * `@1` - `dest`, with three bytes written for each unbroken group the walk read.
 // * `@2` - The index into `dest` where the next byte goes.
 _unbroken_groups: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
