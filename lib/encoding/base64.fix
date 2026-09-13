@@ -83,7 +83,7 @@ base64_decode = |str| (
     dest.truncate(dest_idx)
 );
 
-// Writes the bytes of every unbroken group from `src_idx` onwards.
+// Reads as many unbroken groups as it can from `src_idx`, and writes their bytes to `dest`.
 //
 // # Parameters
 // * `src` - The characters to read.
@@ -116,8 +116,8 @@ _unbroken_groups = |src, src_size, src_idx, dest, dest_idx| (
     )
 );
 
-// Writes the bytes of the one group that starts at `src_idx`, passing over any character in it
-// that stands for no piece.
+// Reads the one group that starts at `src_idx` and writes its bytes to `dest`, passing over any
+// character in it that stands for no piece.
 //
 // Four pieces are three bytes. A group the string ends in can hold fewer: three pieces are two
 // bytes, two pieces are one byte, and a single piece is six bits, which is no byte at all.
