@@ -141,6 +141,7 @@ _one_group: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
 _one_group = |src, src_size, src_idx, dest, dest_idx| (
     // `acc` holds the `filled` pieces read so far, six bits each.
     let (src_idx, acc, filled) = loop((src_idx, 0, 0), |(src_idx, acc, filled)|
+        // Four pieces are a group, so this call has read the one group it is for.
         if filled == 4 { break $ (src_idx, acc, filled) };
         if src_idx == src_size { break $ (src_idx, acc, filled) };
         let piece = _u8_to_b64_table.@(src.@(src_idx).i64);
