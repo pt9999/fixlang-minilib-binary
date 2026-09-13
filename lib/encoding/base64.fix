@@ -10,8 +10,8 @@
 // multiple of three ends in a group of one or two bytes, which the padding character `=` fills out
 // to four characters; a string may likewise end in a group of two or three pieces.
 //
-// A group of characters is *unbroken* when each of its four characters stands for a piece. That
-// is where a reading is three bytes at once; elsewhere it goes one character at a time, since a
+// A group of characters is *unbroken* when each of its four characters stands for a piece. There
+// the reading takes three bytes at a time; elsewhere it goes one character at a time, since a
 // character standing for no piece is passed over and the pieces around it close up.
 module Minilib.Encoding.Base64;
 
@@ -69,12 +69,12 @@ base64_decode = |str| (
     let src = str.get_bytes;
     let src_size = str.@size;
     // Four six-bit pieces are three bytes, and a character standing for no piece only lowers the
-    // count of pieces, so the string holds at most this many bytes however many of them it carries.
+    // count of pieces, so the string decodes to at most this many bytes.
     let dest = Array::fill(src_size * 3 / 4, 0_U8);
     // The run of unbroken groups is walked three bytes at a time, and the group that breaks it --
     // one holding a character that stands for no piece, or the short one the string ends in -- a
     // character at a time. Either walk leaves the reading at the first character of a group, or at
-    // the end of the string, which the round after it reads as the end of the walk.
+    // the end of the string, which the next round reads as the end of the walk.
     let (dest, dest_idx) = loop((0, dest, 0), |(src_idx, dest, dest_idx)|
         if src_idx == src_size { break $ (dest, dest_idx) };
         let (src_idx, dest, dest_idx) = _unbroken_groups(src, src_size, src_idx, dest, dest_idx);
@@ -119,9 +119,9 @@ _unbroken_groups = |src, src_size, src_idx, dest, dest_idx| (
 // Writes the bytes of the one group that starts at `src_idx`, passing over the characters in it
 // that stand for no piece.
 //
-// Four pieces are three bytes. A group the string ends before its fourth piece is what a padded
-// last group leaves: three pieces are two bytes, two pieces are one byte, and a single piece is
-// six bits, which is no byte at all.
+// Four pieces are three bytes. A group the string cuts short is what a padded last group leaves:
+// three pieces are two bytes, two pieces are one byte, and a single piece is six bits, which is
+// no byte at all.
 //
 // # Parameters
 // * `src` - The characters to read.
