@@ -31,9 +31,9 @@ base64_encode = |src| (
         let b1 = src.@(src_idx + 1);
         let b2 = src.@(src_idx + 2);
         let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).i64);
-        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).bit_and(63_U8).i64);
-        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_or(b2.shift_right(6_U8)).bit_and(63_U8).i64);
-        let u3 = _b64_to_u8_table.@(b2.bit_and(63_U8).i64);
+        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).i64);
+        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_or(b2.shift_right(6_U8)).i64);
+        let u3 = _b64_to_u8_table.@(b2.i64);
         let dest = dest.set(dest_idx, u0).set(dest_idx + 1, u1)
                         .set(dest_idx + 2, u2).set(dest_idx + 3, u3);
         continue $ (dest, src_idx + 3, dest_idx + 4)
@@ -46,7 +46,7 @@ base64_encode = |src| (
     else if rest == 1 {
         let b0 = src.@(src_idx);
         let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).i64);
-        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_and(63_U8).i64);
+        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).i64);
         dest.set(dest_idx, u0).set(dest_idx + 1, u1)
             .set(dest_idx + 2, '=').set(dest_idx + 3, '=')
     } else {
@@ -54,8 +54,8 @@ base64_encode = |src| (
         let b0 = src.@(src_idx);
         let b1 = src.@(src_idx + 1);
         let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).i64);
-        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).bit_and(63_U8).i64);
-        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_and(63_U8).i64);
+        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).i64);
+        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).i64);
         dest.set(dest_idx, u0).set(dest_idx + 1, u1)
             .set(dest_idx + 2, u2).set(dest_idx + 3, '=')
     };
@@ -165,12 +165,15 @@ _one_group = |src, src_size, src_idx, dest, dest_idx| (
     (src_idx, dest, dest_idx)
 );
 
-// The BASE64 character that each six-bit piece is written as.
+// The BASE64 character that each six-bit piece is written as, held in four copies so that a byte
+// indexes the table as it stands. Entry `i` is the character for `i.bit_and(63)`, which is what lets
+// `base64_encode` write three of a group's four characters without masking the index first.
 //
-// [0..63] -> [0..255]
+// [0..255] -> [0..255]
 _b64_to_u8_table: Array U8;
 _b64_to_u8_table = (
-    Array::from_map(64, |i|
+    Array::from_map(256, |i|
+        let i = i.bit_and(63);
         if i < 26 { 'A' + i.u8 };
         if i < 52 { 'a' + (i - 26).u8 };
         if i < 62 { '0' + (i - 52).u8 };
