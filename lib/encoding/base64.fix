@@ -1,4 +1,18 @@
 // BASE64 encoding and decoding
+//
+// Three words run through this module.
+//
+// A *piece* is the six bits that one BASE64 character stands for. `_u8_to_b64_table` reads a
+// character into a piece, and `_b64_to_u8_table` writes a piece back as a character.
+//
+// A *group* is the unit the conversion works in: twenty-four bits. That is three bytes on one
+// side, and four pieces -- four characters -- on the other. A byte array whose length is not a
+// multiple of three ends in a group of one or two bytes, and the padding character `=` fills the
+// characters of that group out to four. A string can end in a group of two or three pieces.
+//
+// A group of characters is *unbroken* when it is four BASE64 characters in a row. A group is
+// *broken* when it holds a character other than BASE64, the padding character `=` included, or
+// when the string ends before its fourth character.
 module Minilib.Encoding.Base64;
 
 import Minilib.Text.Hex;
@@ -8,62 +22,158 @@ import Minilib.Text.StringEx;
 base64_encode: Array U8 -> String;
 base64_encode = |src| (
     let src_size = src.@size;
-    let dest_size = (src_size + 2) / 3 * 4;
-    let dest = Array::fill(dest_size, 0_U8);
-    loop(
-        (dest, 0, 0), |(dest, src_idx, dest_idx)|
-        if src_idx >= src_size {
-            if dest_size != dest_idx { undefined("dest_size mismatch") };
-            break $ dest.StringEx::from_array
-        };
-        let has_b1 = (src_idx + 1 < src_size);
-        let has_b2 = (src_idx + 2 < src_size);
+    let dest = Array::fill((src_size + 2) / 3 * 4, 0_U8);
+    let groups = src_size / 3;
+    // Every three bytes are four characters, and each character stands for six of their bits.
+    let dest = loop((dest, 0, 0), |(dest, src_idx, dest_idx)|
+        if src_idx + 3 > src_size { break $ dest };
         let b0 = src.@(src_idx);
-        let b1 = if has_b1 { src.@(src_idx + 1) } else { 0_U8 };
-        let b2 = if has_b2 { src.@(src_idx + 2) } else { 0_U8 };
+        let b1 = src.@(src_idx + 1);
+        let b2 = src.@(src_idx + 2);
         let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).i64);
-        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).bit_and(63_U8).i64);
-        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_or(b2.shift_right(6_U8)).bit_and(63_U8).i64);
-        let u3 = _b64_to_u8_table.@(b2.bit_and(63_U8).i64);
-        let dest = dest.set(dest_idx, u0)
-                        .set(dest_idx + 1, u1)
-                        .set(dest_idx + 2, if has_b1 { u2 } else { '=' })
-                        .set(dest_idx + 3, if has_b2 { u3 } else { '=' });
+        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).i64);
+        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).bit_or(b2.shift_right(6_U8)).i64);
+        let u3 = _b64_to_u8_table.@(b2.i64);
+        let dest = dest.set(dest_idx, u0).set(dest_idx + 1, u1)
+                        .set(dest_idx + 2, u2).set(dest_idx + 3, u3);
         continue $ (dest, src_idx + 3, dest_idx + 4)
-    )
+    );
+    // A last group of one or two bytes goes here, with `=` filling its characters out to four.
+    let src_idx = groups * 3;
+    let dest_idx = groups * 4;
+    let rest = src_size - src_idx;
+    let dest = if rest == 0 { dest }
+    else if rest == 1 {
+        let b0 = src.@(src_idx);
+        let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).i64);
+        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).i64);
+        dest.set(dest_idx, u0).set(dest_idx + 1, u1)
+            .set(dest_idx + 2, '=').set(dest_idx + 3, '=')
+    } else {
+        // rest == 2
+        let b0 = src.@(src_idx);
+        let b1 = src.@(src_idx + 1);
+        let u0 = _b64_to_u8_table.@(b0.shift_right(2_U8).i64);
+        let u1 = _b64_to_u8_table.@(b0.shift_left(4_U8).bit_or(b1.shift_right(4_U8)).i64);
+        let u2 = _b64_to_u8_table.@(b1.shift_left(2_U8).i64);
+        dest.set(dest_idx, u0).set(dest_idx + 1, u1)
+            .set(dest_idx + 2, u2).set(dest_idx + 3, '=')
+    };
+    dest.StringEx::from_array
 );
 
 // Decodes a string which contains BASE64 characters to a byte array.
 // Characters other than BASE64 are ignored.
 base64_decode: String -> Array U8;
 base64_decode = |str| (
-    let src = str.to_iter.map(|u8| _u8_to_b64_table.@(u8.i64))
-                .filter(|b64| b64 != 0xFF_U8).to_array;
-    let src_size = src.@size;
-    let dest_size = src_size * 3 / 4;
-    let dest = Array::fill(dest_size, 0_U8);
-    let dest = loop(
-        (dest, 0, 0), |(dest, src_idx, dest_idx)|
-        if src_idx + 1 >= src_size { break $ dest };
-        let b0 = src.@(src_idx);
-        let b1 = src.@(src_idx + 1);
-        let dest = dest.set(dest_idx, b0.shift_left(2_U8).bit_or(b1.shift_right(4_U8)));
-        if src_idx + 2 >= src_size { break $ dest };
-        let b2 = src.@(src_idx + 2);
-        let dest = dest.set(dest_idx + 1, b1.bit_and(0x0F_U8).shift_left(4_U8).bit_or(b2.shift_right(2_U8)));
-        if src_idx + 3 >= src_size { break $ dest };
-        let b3 = src.@(src_idx + 3);
-        let dest = dest.set(dest_idx + 2, b2.bit_and(0x03_U8).shift_left(6_U8).bit_or(b3));
-        continue $ (dest, src_idx + 4, dest_idx + 3)
+    let src = str.get_bytes;
+    let src_size = str.@size;
+    // Four six-bit pieces are three bytes. A character other than BASE64 only lowers the count of
+    // pieces, so the string decodes to at most this many bytes.
+    let dest = Array::fill(src_size * 3 / 4, 0_U8);
+    // `_unbroken_groups` reads a run of unbroken groups, three bytes at a time. It stops at the
+    // group that breaks the run, or at the short group the string ends in. `_one_group` then
+    // reads that group, one character at a time. Both stop at the first character of a group,
+    // or at the end of the string, which ends the loop on the next round.
+    let (dest, dest_idx) = loop((0, dest, 0), |(src_idx, dest, dest_idx)|
+        if src_idx == src_size { break $ (dest, dest_idx) };
+        let (src_idx, dest, dest_idx) = _unbroken_groups(src, src_size, src_idx, dest, dest_idx);
+        continue $ _one_group(src, src_size, src_idx, dest, dest_idx)
     );
-    if dest_size != dest.@size { undefined("dest_size mismatch") };
-    dest
+    dest.truncate(dest_idx)
 );
 
-// [0..63] -> [0..255]
+// Reads as many unbroken groups as it can from `src_idx`, and writes their bytes to `dest`.
+//
+// # Parameters
+// * `src` - The characters to read.
+// * `src_size` - How many characters the string holds. That is one less than `src.@size`, since
+//   the bytes of a string carry its null terminator.
+// * `src_idx` - The index into `src` to read from.
+// * `dest` - The bytes written so far.
+// * `dest_idx` - The index into `dest` where the next byte goes.
+//
+// # Returns
+// A three-tuple saying where the walk stopped.
+// * `@0` - The index into `src` to read from next: the first character of a broken group, or the
+//   end of the string.
+// * `@1` - `dest`, with three bytes written for each unbroken group the walk read.
+// * `@2` - The index into `dest` where the next byte goes.
+_unbroken_groups: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
+_unbroken_groups = |src, src_size, src_idx, dest, dest_idx| (
+    loop((src_idx, dest, dest_idx), |(src_idx, dest, dest_idx)|
+        if src_idx + 4 > src_size { break $ (src_idx, dest, dest_idx) };
+        let p0 = _u8_to_b64_table.@(src.@(src_idx).i64);
+        let p1 = _u8_to_b64_table.@(src.@(src_idx + 1).i64);
+        let p2 = _u8_to_b64_table.@(src.@(src_idx + 2).i64);
+        let p3 = _u8_to_b64_table.@(src.@(src_idx + 3).i64);
+        // A piece is at most 63, and a character other than BASE64 is 0xFF.
+        if p0.bit_or(p1).bit_or(p2).bit_or(p3) >= 64_U8 { break $ (src_idx, dest, dest_idx) };
+        let dest = dest.set(dest_idx, p0.shift_left(2_U8).bit_or(p1.shift_right(4_U8)))
+                        .set(dest_idx + 1, p1.shift_left(4_U8).bit_or(p2.shift_right(2_U8)))
+                        .set(dest_idx + 2, p2.shift_left(6_U8).bit_or(p3));
+        continue $ (src_idx + 4, dest, dest_idx + 3)
+    )
+);
+
+// Reads the one group that starts at `src_idx` and writes its bytes to `dest`. Characters other
+// than BASE64 are passed over.
+//
+// Four pieces are three bytes. A group the string ends in can hold fewer: three pieces are two
+// bytes, two pieces are one byte, and a single piece is six bits, which is no byte at all.
+//
+// # Parameters
+// * `src` - The characters to read.
+// * `src_size` - How many characters the string holds. That is one less than `src.@size`, since
+//   the bytes of a string carry its null terminator.
+// * `src_idx` - The index into `src` to read from: the first character of a group, or the end
+//   of the string, which leaves the bytes as they are.
+// * `dest` - The bytes written so far.
+// * `dest_idx` - The index into `dest` where the next byte goes.
+//
+// # Returns
+// A three-tuple saying where the reading stopped.
+// * `@0` - The index into `src` to read from next: the first character of the group after this
+//   one, or the end of the string.
+// * `@1` - `dest`, with the bytes this group stands for written.
+// * `@2` - The index into `dest` where the next byte goes.
+_one_group: Array U8 -> I64 -> I64 -> Array U8 -> I64 -> (I64, Array U8, I64);
+_one_group = |src, src_size, src_idx, dest, dest_idx| (
+    // `acc` holds the `filled` pieces read so far, six bits each.
+    let (src_idx, acc, filled) = loop((src_idx, 0, 0), |(src_idx, acc, filled)|
+        // Four pieces are a group, so this call has read the one group it is for.
+        if filled == 4 { break $ (src_idx, acc, filled) };
+        if src_idx == src_size { break $ (src_idx, acc, filled) };
+        let piece = _u8_to_b64_table.@(src.@(src_idx).i64);
+        if piece == 0xFF_U8 { continue $ (src_idx + 1, acc, filled) };
+        continue $ (src_idx + 1, acc.shift_left(6).bit_or(piece.i64), filled + 1)
+    );
+    if filled == 4 {
+        let dest = dest.set(dest_idx, acc.shift_right(16).u8)
+                        .set(dest_idx + 1, acc.shift_right(8).bit_and(255).u8)
+                        .set(dest_idx + 2, acc.bit_and(255).u8);
+        (src_idx, dest, dest_idx + 3)
+    };
+    if filled == 3 {
+        let dest = dest.set(dest_idx, acc.shift_right(10).u8)
+                        .set(dest_idx + 1, acc.shift_right(2).bit_and(255).u8);
+        (src_idx, dest, dest_idx + 2)
+    };
+    if filled == 2 {
+        (src_idx, dest.set(dest_idx, acc.shift_right(4).u8), dest_idx + 1)
+    };
+    (src_idx, dest, dest_idx)
+);
+
+// The BASE64 character that each six-bit piece is written as, held in four copies so that a byte
+// indexes the table as it stands. Entry `i` is the character for `i.bit_and(63)`, which is what lets
+// `base64_encode` write three of a group's four characters without masking the index first.
+//
+// [0..255] -> [0..255]
 _b64_to_u8_table: Array U8;
 _b64_to_u8_table = (
-    Array::from_map(64, |i|
+    Array::from_map(256, |i|
+        let i = i.bit_and(63);
         if i < 26 { 'A' + i.u8 };
         if i < 52 { 'a' + (i - 26).u8 };
         if i < 62 { '0' + (i - 52).u8 };
@@ -71,6 +181,8 @@ _b64_to_u8_table = (
     )
 );
 
+// The six-bit piece that each BASE64 character stands for.
+//
 // [0..255] -> [0..63], or 0xFF if not a BASE64 char
 _u8_to_b64_table: Array U8;
 _u8_to_b64_table = (

@@ -42,6 +42,9 @@ test_base64_decode = (
             ("/ty6mHZUMhA=", "fedcba9876543210"),
             ("  /t y 6 mH ?!? Z U M h A= ", "fedcba9876543210"),
             ("azAZ09+/", "6b3019d3dfbf"),
+            ("????", ""),                   // only characters standing for no piece
+            ("ab==cd==", "69b71d"),         // a padding character anywhere is ignored
+            ("abcde", "69b71d"),            // a fifth piece completes no byte
             // rfc3548 7.  Illustrations and examples
             ("FPucA9l+", "14fb9c03d97e"),
             ("FPucA9k=", "14fb9c03d9"),
