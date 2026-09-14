@@ -1,3 +1,8 @@
+## 0.7.1
+### Changed
+- Merged PR#3 (thanks to tttmmmyyyy san).
+  - Minilib.Encoding.Base64: Greatly optimized.
+
 ## 0.7.0
 ### Changed
 - Merged PR#2 (thanks to tttmmmyyyy san).
