@@ -1,3 +1,7 @@
+## 0.7.2
+### Changed
+- Added indirect dependencies.
+
 ## 0.7.1
 ### Changed
 - Merged PR#3 (thanks to tttmmmyyyy san).
