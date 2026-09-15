@@ -1,6 +1,6 @@
 # Minilib.Encoding.Binary
 
-Defined in minilib-binary@0.7.1
+Defined in minilib-binary@0.7.2
 
 Binary utility, such as:
 - Byte order
