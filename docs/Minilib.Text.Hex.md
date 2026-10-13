@@ -1,6 +1,6 @@
 # Minilib.Text.Hex
 
-Defined in minilib-binary@0.7.2
+Defined in minilib-binary@0.8.0
 
 Hexadecimal string conversion
 
