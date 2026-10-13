@@ -1,10 +1,11 @@
 module Base64Test;
 
-import Minilib.Common.TimeEx;
-import Minilib.Encoding.Base64;
-import Minilib.Text.StringEx;
-import Minilib.Text.Hex;
-import Minilib.Testing.UnitTest;
+import Minilib.Common.TimeEx::measure_time;
+import Minilib.Encoding.Base64::{base64_decode, base64_encode};
+import Minilib.Testing.UnitTest::{assert_equal, make_table_test, make_test, run_test_driver, TestCase};
+import Minilib.Text.Hex::{FromStringHex::from_string_hex, ToStringHex::to_string_hex};
+import Minilib.Text.StringEx::Format::format;
+import Std::{F64, IO, Array::from_map, IO::{println, IOFail::{from_result, lift}}, ToU8::u8};
 
 test_base64_encode: TestCase;
 test_base64_encode = (

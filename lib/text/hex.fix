@@ -1,10 +1,15 @@
 // Hexadecimal string conversion
 module Minilib.Text.Hex;
 
-import Character;
-
-import Minilib.Text.StringEx;
-import Minilib.Trait.Traversable;
+import Character::is_space;
+import Minilib.Text.StringEx::{from_array, from_iter, to_array, to_iter};
+import Minilib.Trait.Traversable::map_m;
+import Std::{
+    Array, ErrMsg, I64, Result, String, U16, U32, U64, U8, Array::{@, to_iter}, Functor::map, 
+    Iterator::{filter, fold_m, map, range, to_array}, Monad::pure, Result::{err, ok}, 
+    String::{@size, concat_iter, from_U8, get_sub}, ToI64::i64, ToU16::u16, ToU32::u32, ToU64::u64, 
+    ToU8::u8, U64::{bit_and, bit_or, shift_left, shift_right}, U8::bit_and
+};
 
 // Converts a 4bit number (0..15) to a hex character ('0'..'9', 'a'..'f').
 encode_hex_char: U8 -> U8;

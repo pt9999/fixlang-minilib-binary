@@ -2,6 +2,7 @@
 ### Changed
 - fixproj.toml: Bumped `fix_version` to 1.6.0. Depends on minilib-common@0.15.0.
 - Minilib.Encoding.Base64: Moved the documentation regarding the algorithm from module comments to internal comments.
+- Reorganized imports using `fix edit explicit-import`.
 
 ## 0.7.2
 ### Changed

@@ -1,8 +1,13 @@
 // BASE64 encoding and decoding
 module Minilib.Encoding.Base64;
 
-import Minilib.Text.Hex;
-import Minilib.Text.StringEx;
+import Minilib.Text.StringEx::from_array;
+import Std::{
+    loop, Array, I64, String, U8, Array::{@, @size, fill, from_map, set, truncate}, 
+    I64::{bit_and, bit_or, shift_left, shift_right}, Iterator::{fold, range}, 
+    LoopState::{break, continue}, String::{@size, get_bytes}, ToI64::i64, ToU8::u8, 
+    U8::{bit_or, shift_left, shift_right}
+};
 
 // Three words run through this module.
 //

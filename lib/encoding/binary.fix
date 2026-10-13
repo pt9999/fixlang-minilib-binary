@@ -3,6 +3,14 @@
 // - Byte buffer
 module Minilib.Encoding.Binary;
 
+import Std::{
+    loop, undefined, Array, ErrMsg, I64, Result, U16, U32, U64, U8, 
+    Array::{@, @size, empty, fill, push_back, set}, I64::{bit_and, shift_left, shift_right}, 
+    LessThan::max, LoopState::{break, continue}, Monad::pure, Result::err, ToString::to_string, 
+    ToU16::u16, ToU32::u32, ToU64::u64, ToU8::u8, U16::{bit_or, shift_left, shift_right}, 
+    U32::{bit_or, shift_left, shift_right}, U64::{bit_or, shift_left, shift_right}
+};
+
 // A union type of byte order (endianness).
 // For example, `0x12345678_U32` is encoded as `[0x78_U8, 0x56_U8, 0x34_U8, 0x12_U8]` in little endian,
 // `[0x12_U8, 0x34_U8, 0x56_U8, 0x78_U8]` in big endian.
