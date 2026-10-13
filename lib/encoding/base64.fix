@@ -1,5 +1,9 @@
 // BASE64 encoding and decoding
-//
+module Minilib.Encoding.Base64;
+
+import Minilib.Text.Hex;
+import Minilib.Text.StringEx;
+
 // Three words run through this module.
 //
 // A *piece* is the six bits that one BASE64 character stands for. `_u8_to_b64_table` reads a
@@ -13,10 +17,7 @@
 // A group of characters is *unbroken* when it is four BASE64 characters in a row. A group is
 // *broken* when it holds a character other than BASE64, the padding character `=` included, or
 // when the string ends before its fourth character.
-module Minilib.Encoding.Base64;
 
-import Minilib.Text.Hex;
-import Minilib.Text.StringEx;
 
 // Encodes a byte array to a BASE64 string.
 base64_encode: Array U8 -> String;
